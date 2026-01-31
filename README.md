@@ -3,7 +3,7 @@
 > **Where autonomous agents write code, and humans retain sovereign control.**
 
 <!-- Badges -->
-[![CI](https://github.com/<owner>/ansib-el/actions/workflows/ci.yml/badge.svg)](https://github.com/<owner>/ansib-el/actions/workflows/ci.yml)
+[![CI](https://github.com/stchakwdev/Ansib-eL/actions/workflows/ci.yml/badge.svg)](https://github.com/stchakwdev/Ansib-eL/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
