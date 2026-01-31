@@ -16,7 +16,6 @@ from uuid import uuid4
 import pytest
 
 from ansibel.ansib_el import AnsibElSystem, SystemStatus
-from ansibel.git_wrapper import GitWrapper
 from ansibel.trust_lineage import (
     ChangeComplexity,
     DecisionType,
@@ -30,6 +29,7 @@ pytestmark = pytest.mark.integration
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _init_git_repo(repo_path: Path) -> None:
     """Initialise a bare git repo with an initial commit at *repo_path*."""
@@ -280,9 +280,7 @@ class TestTrustLineageIntegration:
 
         score_after_reject = manager.trust.get_trust_score(agent_id)
         assert score_after_reject.sample_count == 6
-        assert score_after_reject.score < high_score, (
-            "Score should decrease after a rejection"
-        )
+        assert score_after_reject.score < high_score, "Score should decrease after a rejection"
 
     def test_trust_tier_reflects_score(self, tmp_path: Path) -> None:
         """Trust tier should match the score range after decisions."""

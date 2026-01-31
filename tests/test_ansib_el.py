@@ -8,29 +8,18 @@ processing (mocked), and review/approval workflows.
 import os
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, patch, PropertyMock
-from uuid import UUID, uuid4
+from unittest.mock import patch
+from uuid import uuid4
 
 import pytest
 
 from ansibel.ansib_el import AnsibElSystem, SystemStatus
 from ansibel.orchestrator import (
-    Orchestrator,
-    Task,
-    TaskBreakdown,
-    TaskPriority,
-    ApprovalRequest,
-    ApprovalResult,
-    Solution,
-    CodeChange,
-    TaskId,
     AgentId,
-    DelegationResult,
+    CodeChange,
+    Solution,
+    Task,
 )
-from ansibel.agent_system import AgentManager, Agent, AgentStatus
-from ansibel.trust_lineage import TrustLineageManager, DecisionType
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -50,18 +39,27 @@ def _init_git_repo(path: Path) -> None:
     subprocess.run(["git", "init"], cwd=str(path), capture_output=True, check=True, env=env)
     subprocess.run(
         ["git", "config", "user.email", "test@ansibel.dev"],
-        cwd=str(path), capture_output=True, check=True, env=env,
+        cwd=str(path),
+        capture_output=True,
+        check=True,
+        env=env,
     )
     subprocess.run(
         ["git", "config", "user.name", "Test Author"],
-        cwd=str(path), capture_output=True, check=True, env=env,
+        cwd=str(path),
+        capture_output=True,
+        check=True,
+        env=env,
     )
     readme = path / "README.md"
     readme.write_text("# Test Repo\n")
     subprocess.run(["git", "add", "."], cwd=str(path), capture_output=True, check=True, env=env)
     subprocess.run(
         ["git", "commit", "-m", "Initial commit"],
-        cwd=str(path), capture_output=True, check=True, env=env,
+        cwd=str(path),
+        capture_output=True,
+        check=True,
+        env=env,
     )
 
 
@@ -84,6 +82,7 @@ def _make_solution(task: Task) -> Solution:
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture()
 def repo_path(tmp_path: Path) -> Path:
@@ -113,6 +112,7 @@ def initialized_system(repo_path: Path) -> AnsibElSystem:
 # 1. System initialisation
 # ---------------------------------------------------------------------------
 
+
 class TestInitialisation:
     def test_initialize_returns_true(self, system: AnsibElSystem) -> None:
         assert system.initialize() is True
@@ -138,6 +138,7 @@ class TestInitialisation:
 # 2. Not-initialised guard
 # ---------------------------------------------------------------------------
 
+
 class TestNotInitialisedGuard:
     def test_process_prompt_raises_before_init(self, system: AnsibElSystem) -> None:
         with pytest.raises(RuntimeError, match="not initialized"):
@@ -151,6 +152,7 @@ class TestNotInitialisedGuard:
 # ---------------------------------------------------------------------------
 # 3. get_status() returns SystemStatus
 # ---------------------------------------------------------------------------
+
 
 class TestGetStatus:
     def test_status_before_init(self, system: AnsibElSystem) -> None:
@@ -170,6 +172,7 @@ class TestGetStatus:
 # 4. list_pending_approvals()
 # ---------------------------------------------------------------------------
 
+
 class TestPendingApprovals:
     def test_empty_before_init(self, system: AnsibElSystem) -> None:
         approvals = system.list_pending_approvals()
@@ -183,6 +186,7 @@ class TestPendingApprovals:
 # ---------------------------------------------------------------------------
 # 5. get_agent_info() with invalid agent ID
 # ---------------------------------------------------------------------------
+
 
 class TestGetAgentInfo:
     def test_invalid_agent_returns_error(self, initialized_system: AnsibElSystem) -> None:
@@ -200,6 +204,7 @@ class TestGetAgentInfo:
 # ---------------------------------------------------------------------------
 # 6. process_prompt -- single agent mode (mocked)
 # ---------------------------------------------------------------------------
+
 
 class TestProcessPromptSingle:
     def test_single_agent_mode(self, initialized_system: AnsibElSystem) -> None:
@@ -227,6 +232,7 @@ class TestProcessPromptSingle:
 # ---------------------------------------------------------------------------
 # 7. process_prompt -- tournament mode (mocked)
 # ---------------------------------------------------------------------------
+
 
 class TestProcessPromptTournament:
     def test_tournament_mode(self, initialized_system: AnsibElSystem) -> None:
@@ -256,6 +262,7 @@ class TestProcessPromptTournament:
 # 8. Review and approve workflow
 # ---------------------------------------------------------------------------
 
+
 class TestReviewApprove:
     def test_approve_workflow(self, initialized_system: AnsibElSystem) -> None:
         """Submit a solution for approval, then approve it."""
@@ -272,9 +279,7 @@ class TestReviewApprove:
 
         # orchestrator.approve_solution now returns ApprovalResult natively.
         # We still mock record_decision since it hits the DB.
-        with patch.object(
-            initialized_system.trust_lineage, "record_decision"
-        ):
+        with patch.object(initialized_system.trust_lineage, "record_decision"):
             result = initialized_system.review_and_approve(
                 approval_id, approve=True, comments="Looks good"
             )
@@ -285,6 +290,7 @@ class TestReviewApprove:
 # ---------------------------------------------------------------------------
 # 9. Review and reject workflow
 # ---------------------------------------------------------------------------
+
 
 class TestReviewReject:
     def test_reject_workflow(self, initialized_system: AnsibElSystem) -> None:
@@ -299,9 +305,7 @@ class TestReviewReject:
         approval_id = initialized_system.orchestrator.submit_for_approval(solution)
 
         # orchestrator.reject_solution now returns ApprovalResult natively.
-        with patch.object(
-            initialized_system.trust_lineage, "record_decision"
-        ):
+        with patch.object(initialized_system.trust_lineage, "record_decision"):
             result = initialized_system.review_and_approve(
                 approval_id, approve=False, comments="Needs rework"
             )
@@ -312,6 +316,7 @@ class TestReviewReject:
 # ---------------------------------------------------------------------------
 # 10. SystemStatus dataclass fields
 # ---------------------------------------------------------------------------
+
 
 class TestSystemStatusDataclass:
     def test_all_fields_present(self) -> None:
@@ -347,6 +352,7 @@ class TestSystemStatusDataclass:
 # 11. Multiple initialisations are safe
 # ---------------------------------------------------------------------------
 
+
 class TestMultipleInit:
     def test_double_init_succeeds(self, repo_path: Path) -> None:
         sys = AnsibElSystem(str(repo_path))
@@ -357,7 +363,6 @@ class TestMultipleInit:
     def test_double_init_preserves_components(self, repo_path: Path) -> None:
         sys = AnsibElSystem(str(repo_path))
         sys.initialize()
-        orch_first = sys.orchestrator
         sys.initialize()
         # After second init, orchestrator is reassigned but system still works
         assert sys.orchestrator is not None
@@ -366,6 +371,7 @@ class TestMultipleInit:
 # ---------------------------------------------------------------------------
 # 12. Constructor sets repo_path correctly
 # ---------------------------------------------------------------------------
+
 
 class TestConstructor:
     def test_repo_path_resolved(self, repo_path: Path) -> None:
@@ -383,11 +389,13 @@ class TestConstructor:
 # 13. process_prompt returns correct structure
 # ---------------------------------------------------------------------------
 
+
 class TestProcessPromptStructure:
     def test_result_keys(self, initialized_system: AnsibElSystem) -> None:
         """Verify the result dict has expected keys."""
         with patch.object(
-            initialized_system, "_run_single_agent_task",
+            initialized_system,
+            "_run_single_agent_task",
             return_value={"mode": "single", "status": "delegated"},
         ):
             result = initialized_system.process_prompt(
@@ -405,6 +413,7 @@ class TestProcessPromptStructure:
 # 14. Approval for non-existent ID
 # ---------------------------------------------------------------------------
 
+
 class TestApprovalNotFound:
     def test_approve_nonexistent_id(self, initialized_system: AnsibElSystem) -> None:
         """Approving a non-existent approval_id should return success=False."""
@@ -419,6 +428,7 @@ class TestApprovalNotFound:
 # ---------------------------------------------------------------------------
 # 15. get_status after process_prompt reflects changes
 # ---------------------------------------------------------------------------
+
 
 class TestStatusAfterProcessing:
     def test_status_reflects_pending_approvals(self, initialized_system: AnsibElSystem) -> None:

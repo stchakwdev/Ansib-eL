@@ -11,29 +11,27 @@ This module provides:
 import hashlib
 import os
 import subprocess
-import uuid as _uuid_mod
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID, uuid4
 
 import pytest
 
-from ansibel.git_wrapper import AgentMetadata as GitAgentMetadata, GitWrapper, MergeResult as GitMergeResult
-from ansibel.agent_system import Agent, AgentManager, AgentStatus
-from ansibel.orchestrator import Orchestrator, Task, TaskBreakdown, TaskPriority
+from ansibel.agent_system import AgentManager, AgentStatus
+from ansibel.git_wrapper import AgentMetadata as GitAgentMetadata
+from ansibel.git_wrapper import GitWrapper
+from ansibel.git_wrapper import MergeResult as GitMergeResult
+from ansibel.orchestrator import Orchestrator, Task, TaskPriority
 from ansibel.tournament import (
     AgentConfig,
-    SelectionMode,
     Solution,
     SolutionStatus,
-    Task as TournamentTask,
-    Tournament,
-    TournamentOrchestrator,
 )
-from ansibel.trust_lineage import TrustLineageManager, TrustScorer, LineageTracker
-from ansibel.exceptions import AnsibElError, GitWrapperError
-
+from ansibel.tournament import (
+    Task as TournamentTask,
+)
+from ansibel.trust_lineage import TrustLineageManager
 
 # ============================================================================
 # Relocated Mock Classes
@@ -51,12 +49,12 @@ class MockGitWrapper:
         self.repo_path = Path(repo_path)
         self._initialized = False
         self._current_branch = "main"
-        self._branches: Dict[str, List[str]] = {"main": []}
-        self._commits: Dict[str, Dict[str, Any]] = {}
-        self._metadata_store: Dict[str, GitAgentMetadata] = {}
-        self._files: Dict[str, str] = {}
+        self._branches: dict[str, list[str]] = {"main": []}
+        self._commits: dict[str, dict[str, Any]] = {}
+        self._metadata_store: dict[str, GitAgentMetadata] = {}
+        self._files: dict[str, str] = {}
         self._dirty = False
-        self._branch_protection: Dict[str, Any] = {}
+        self._branch_protection: dict[str, Any] = {}
         self._commit_counter = 0
 
     # -- Initialisation ------------------------------------------------------
@@ -70,7 +68,7 @@ class MockGitWrapper:
 
     # -- Branch operations ---------------------------------------------------
 
-    def create_branch(self, branch_name: str, from_branch: Optional[str] = None) -> bool:
+    def create_branch(self, branch_name: str, from_branch: str | None = None) -> bool:
         base = from_branch or self._current_branch
         self._branches[branch_name] = list(self._branches.get(base, []))
         return True
@@ -93,7 +91,7 @@ class MockGitWrapper:
 
     # -- Commit operations ---------------------------------------------------
 
-    def commit_changes(self, message: str, files: Optional[List[str]] = None) -> str:
+    def commit_changes(self, message: str, files: list[str] | None = None) -> str:
         self._commit_counter += 1
         commit_hash = hashlib.sha1(
             f"{message}-{self._commit_counter}-{datetime.now(timezone.utc).isoformat()}".encode()
@@ -112,13 +110,13 @@ class MockGitWrapper:
         self,
         message: str,
         metadata: GitAgentMetadata,
-        files: Optional[List[str]] = None,
+        files: list[str] | None = None,
     ) -> str:
         commit_hash = self.commit_changes(message, files)
         self._metadata_store[commit_hash] = metadata
         return commit_hash
 
-    def get_commit_metadata(self, commit_hash: str) -> Optional[GitAgentMetadata]:
+    def get_commit_metadata(self, commit_hash: str) -> GitAgentMetadata | None:
         return self._metadata_store.get(commit_hash)
 
     # -- Merge operations ----------------------------------------------------
@@ -144,7 +142,7 @@ class MockGitWrapper:
         self,
         branch_name: str,
         strategy: str = "merge",
-        target_branch: Optional[str] = None,
+        target_branch: str | None = None,
     ) -> GitMergeResult:
         original = self._current_branch
         if target_branch:
@@ -164,7 +162,7 @@ class MockGitWrapper:
             return ""
         return f"diff --mock a/{branch_a} b/{branch_b}\n+{len(diff_commits)} commit(s) differ"
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         return {
             "initialized": self._initialized,
             "branch": self._current_branch,
@@ -179,7 +177,7 @@ class MockGitWrapper:
     def is_working_tree_clean(self) -> bool:
         return not self._dirty
 
-    def get_last_commit(self) -> Optional[str]:
+    def get_last_commit(self) -> str | None:
         branch_commits = self._branches.get(self._current_branch, [])
         return branch_commits[-1] if branch_commits else None
 
@@ -196,7 +194,7 @@ class MockGitWrapper:
 
     # -- Agent branch listing ------------------------------------------------
 
-    def list_agent_branches(self, status: Optional[str] = None) -> List[Dict[str, Any]]:
+    def list_agent_branches(self, status: str | None = None) -> list[dict[str, Any]]:
         return [
             {"name": name, "status": "active"}
             for name in self._branches
@@ -214,7 +212,7 @@ class MockGitWrapper:
 
     # -- History -------------------------------------------------------------
 
-    def get_ai_enhanced_history(self, limit: int = 20) -> List[Dict[str, Any]]:
+    def get_ai_enhanced_history(self, limit: int = 20) -> list[dict[str, Any]]:
         history = []
         for commit_hash, info in list(self._commits.items())[-limit:]:
             metadata = self._metadata_store.get(commit_hash)
@@ -239,8 +237,8 @@ class MockAgent:
         purpose: str = "test-task",
         model_version: str = "gpt-4-test",
         status: AgentStatus = AgentStatus.IDLE,
-        workspace_branch: Optional[str] = None,
-        agent_id: Optional[UUID] = None,
+        workspace_branch: str | None = None,
+        agent_id: UUID | None = None,
     ) -> None:
         self.agent_id: UUID = agent_id or uuid4()
         self.purpose = purpose
@@ -250,7 +248,7 @@ class MockAgent:
         self.status = status
         self.workspace_branch = workspace_branch or f"agent/{str(self.agent_id)[:8]}/mock"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "agent_id": str(self.agent_id),
             "purpose": self.purpose,
@@ -270,11 +268,11 @@ class MockAgentManager:
     """
 
     def __init__(self) -> None:
-        self.spawned_agents: Dict[str, AgentConfig] = {}
-        self.executed_tasks: List[Dict[str, Any]] = []
-        self.terminated_agents: List[str] = []
+        self.spawned_agents: dict[str, AgentConfig] = {}
+        self.executed_tasks: list[dict[str, Any]] = []
+        self.terminated_agents: list[str] = []
         # Allow tests to inject custom solution generators
-        self._solution_factory: Optional[Any] = None
+        self._solution_factory: Any | None = None
 
     def set_solution_factory(self, factory: Any) -> None:
         """Set a callable ``(agent_id, task) -> Solution`` for custom results."""
@@ -433,7 +431,10 @@ def sample_task() -> Task:
     return Task(
         description="Implement user login endpoint",
         requirements=["Create login API", "Validate credentials", "Return JWT token"],
-        acceptance_criteria=["Login works with valid credentials", "Invalid credentials are rejected"],
+        acceptance_criteria=[
+            "Login works with valid credentials",
+            "Invalid credentials are rejected",
+        ],
         priority=TaskPriority.HIGH,
     )
 
@@ -472,7 +473,7 @@ def sample_tournament_task() -> TournamentTask:
 
 
 @pytest.fixture
-def sample_agent_configs() -> List[AgentConfig]:
+def sample_agent_configs() -> list[AgentConfig]:
     """Return a list of three ``AgentConfig`` objects for tournament tests."""
     return [
         AgentConfig(

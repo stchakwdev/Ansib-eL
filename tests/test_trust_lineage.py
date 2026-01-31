@@ -29,11 +29,9 @@ Tests cover:
 from __future__ import annotations
 
 import hashlib
-import sqlite3
 import threading
-import time
 from datetime import datetime, timedelta, timezone
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 import pytest
 
@@ -43,7 +41,6 @@ from ansibel.trust_lineage import (
     DecisionLineage,
     DecisionRecord,
     DecisionType,
-    LineageTracker,
     ReasoningRecord,
     TrustLineageManager,
     TrustScore,
@@ -51,10 +48,10 @@ from ansibel.trust_lineage import (
     TrustTier,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _commit_hash() -> str:
     """Generate a unique fake commit hash."""
@@ -72,6 +69,7 @@ def _manager(tmp_path) -> TrustLineageManager:
 # ---------------------------------------------------------------------------
 # 1. Decision recording for all DecisionTypes
 # ---------------------------------------------------------------------------
+
 
 class TestDecisionRecordingAllTypes:
     """Verify that every DecisionType can be recorded without error."""
@@ -105,6 +103,7 @@ class TestDecisionRecordingAllTypes:
 # ---------------------------------------------------------------------------
 # 2. EMA smoothing -- score increases on ACCEPTED, decreases on REJECTED
 # ---------------------------------------------------------------------------
+
 
 class TestEMASmoothing:
     def test_score_increases_on_accepted(self, tmp_path):
@@ -168,6 +167,7 @@ class TestEMASmoothing:
 # 3. Score clamping -- never below 0 or above 1
 # ---------------------------------------------------------------------------
 
+
 class TestScoreClamping:
     def test_score_never_exceeds_1(self, tmp_path):
         scorer = _scorer(tmp_path)
@@ -207,6 +207,7 @@ class TestScoreClamping:
 # 4. Unknown agent default score
 # ---------------------------------------------------------------------------
 
+
 class TestUnknownAgentDefault:
     def test_unknown_agent_returns_default_score(self, tmp_path):
         scorer = _scorer(tmp_path)
@@ -219,6 +220,7 @@ class TestUnknownAgentDefault:
 # ---------------------------------------------------------------------------
 # 5. TrustTier boundary classification
 # ---------------------------------------------------------------------------
+
 
 class TestTrustTierBoundaries:
     @pytest.mark.parametrize(
@@ -245,6 +247,7 @@ class TestTrustTierBoundaries:
 # ---------------------------------------------------------------------------
 # 6. Auto-approval logic by tier + change size
 # ---------------------------------------------------------------------------
+
 
 class TestAutoApproval:
     def test_untrusted_cannot_auto_approve(self, tmp_path):
@@ -308,6 +311,7 @@ class TestAutoApproval:
 # 7. Time decay
 # ---------------------------------------------------------------------------
 
+
 class TestTimeDecay:
     def test_decay_reduces_score_over_time(self, tmp_path):
         scorer = _scorer(tmp_path)
@@ -327,6 +331,7 @@ class TestTimeDecay:
 # ---------------------------------------------------------------------------
 # 8. Minimum floor enforcement
 # ---------------------------------------------------------------------------
+
 
 class TestMinFloor:
     def test_decay_does_not_drop_below_floor(self, tmp_path):
@@ -348,6 +353,7 @@ class TestMinFloor:
 # ---------------------------------------------------------------------------
 # 9. Confidence progression
 # ---------------------------------------------------------------------------
+
 
 class TestConfidenceProgression:
     def test_confidence_increases_with_decisions(self, tmp_path):
@@ -384,6 +390,7 @@ class TestConfidenceProgression:
 # 10. Agent profile CRUD
 # ---------------------------------------------------------------------------
 
+
 class TestAgentProfileCRUD:
     def test_profile_created_on_first_decision(self, tmp_path):
         scorer = _scorer(tmp_path)
@@ -410,12 +417,24 @@ class TestAgentProfileCRUD:
         scorer = _scorer(tmp_path)
         agent_id = uuid4()
 
-        scorer.record_decision(agent_id=agent_id, decision=DecisionType.ACCEPTED,
-                               commit_hash=_commit_hash(), review_time_ms=100)
-        scorer.record_decision(agent_id=agent_id, decision=DecisionType.REJECTED,
-                               commit_hash=_commit_hash(), review_time_ms=100)
-        scorer.record_decision(agent_id=agent_id, decision=DecisionType.MODIFIED,
-                               commit_hash=_commit_hash(), review_time_ms=100)
+        scorer.record_decision(
+            agent_id=agent_id,
+            decision=DecisionType.ACCEPTED,
+            commit_hash=_commit_hash(),
+            review_time_ms=100,
+        )
+        scorer.record_decision(
+            agent_id=agent_id,
+            decision=DecisionType.REJECTED,
+            commit_hash=_commit_hash(),
+            review_time_ms=100,
+        )
+        scorer.record_decision(
+            agent_id=agent_id,
+            decision=DecisionType.MODIFIED,
+            commit_hash=_commit_hash(),
+            review_time_ms=100,
+        )
 
         profile = scorer.get_agent_profile(agent_id)
         assert profile.total_decisions == 3
@@ -427,8 +446,12 @@ class TestAgentProfileCRUD:
         scorer = _scorer(tmp_path)
         ids = [uuid4() for _ in range(3)]
         for aid in ids:
-            scorer.record_decision(agent_id=aid, decision=DecisionType.ACCEPTED,
-                                   commit_hash=_commit_hash(), review_time_ms=100)
+            scorer.record_decision(
+                agent_id=aid,
+                decision=DecisionType.ACCEPTED,
+                commit_hash=_commit_hash(),
+                review_time_ms=100,
+            )
         agents = scorer.get_all_agents()
         assert len(agents) == 3
         returned_ids = {a.agent_id for a in agents}
@@ -439,6 +462,7 @@ class TestAgentProfileCRUD:
 # 11. Recovery boost after rejection streak
 # ---------------------------------------------------------------------------
 
+
 class TestRecoveryBoost:
     def test_apply_recovery_boosts_score(self, tmp_path):
         scorer = _scorer(tmp_path)
@@ -446,8 +470,12 @@ class TestRecoveryBoost:
 
         # Create agent with low score via rejections
         for _ in range(5):
-            scorer.record_decision(agent_id=agent_id, decision=DecisionType.REJECTED,
-                                   commit_hash=_commit_hash(), review_time_ms=100)
+            scorer.record_decision(
+                agent_id=agent_id,
+                decision=DecisionType.REJECTED,
+                commit_hash=_commit_hash(),
+                review_time_ms=100,
+            )
         before = scorer.get_trust_score(agent_id).score
 
         boosted = scorer.apply_recovery(agent_id, boost_amount=0.2)
@@ -457,8 +485,12 @@ class TestRecoveryBoost:
         scorer = _scorer(tmp_path)
         agent_id = uuid4()
 
-        scorer.record_decision(agent_id=agent_id, decision=DecisionType.ACCEPTED,
-                               commit_hash=_commit_hash(), review_time_ms=100)
+        scorer.record_decision(
+            agent_id=agent_id,
+            decision=DecisionType.ACCEPTED,
+            commit_hash=_commit_hash(),
+            review_time_ms=100,
+        )
         boosted = scorer.apply_recovery(agent_id, boost_amount=5.0)
         assert boosted.score <= 1.0
 
@@ -471,6 +503,7 @@ class TestRecoveryBoost:
 # ---------------------------------------------------------------------------
 # 12. Reasoning recording with record_complete_decision()
 # ---------------------------------------------------------------------------
+
 
 class TestRecordCompleteDecision:
     def test_returns_both_records(self, tmp_path):
@@ -505,6 +538,7 @@ class TestRecordCompleteDecision:
 # ---------------------------------------------------------------------------
 # 13. Lineage retrieval by commit hash
 # ---------------------------------------------------------------------------
+
 
 class TestLineageRetrieval:
     def test_get_lineage_returns_decision_and_reasoning(self, tmp_path):
@@ -542,6 +576,7 @@ class TestLineageRetrieval:
 # ---------------------------------------------------------------------------
 # 14. Chain tracing for linked decisions
 # ---------------------------------------------------------------------------
+
 
 class TestChainTracing:
     def test_trace_decision_chain_follows_parents(self, tmp_path):
@@ -614,6 +649,7 @@ class TestChainTracing:
 # 15. Keyword search with/without agent filter
 # ---------------------------------------------------------------------------
 
+
 class TestKeywordSearch:
     def test_search_finds_matching_reasoning(self, tmp_path):
         mgr = _manager(tmp_path)
@@ -621,8 +657,10 @@ class TestKeywordSearch:
 
         # Create agent profile first
         mgr.trust.record_decision(
-            agent_id=agent_id, decision=DecisionType.ACCEPTED,
-            commit_hash=_commit_hash(), review_time_ms=100,
+            agent_id=agent_id,
+            decision=DecisionType.ACCEPTED,
+            commit_hash=_commit_hash(),
+            review_time_ms=100,
         )
 
         mgr.lineage.record_reasoning(
@@ -649,20 +687,28 @@ class TestKeywordSearch:
 
         # Create agent profiles first
         mgr.trust.record_decision(
-            agent_id=agent_a, decision=DecisionType.ACCEPTED,
-            commit_hash=_commit_hash(), review_time_ms=100,
+            agent_id=agent_a,
+            decision=DecisionType.ACCEPTED,
+            commit_hash=_commit_hash(),
+            review_time_ms=100,
         )
         mgr.trust.record_decision(
-            agent_id=agent_b, decision=DecisionType.ACCEPTED,
-            commit_hash=_commit_hash(), review_time_ms=100,
+            agent_id=agent_b,
+            decision=DecisionType.ACCEPTED,
+            commit_hash=_commit_hash(),
+            review_time_ms=100,
         )
 
         mgr.lineage.record_reasoning(
-            agent_id=agent_a, task_id="t1", commit_hash=_commit_hash(),
+            agent_id=agent_a,
+            task_id="t1",
+            commit_hash=_commit_hash(),
             reasoning="Refactored the parser module.",
         )
         mgr.lineage.record_reasoning(
-            agent_id=agent_b, task_id="t2", commit_hash=_commit_hash(),
+            agent_id=agent_b,
+            task_id="t2",
+            commit_hash=_commit_hash(),
             reasoning="Refactored the renderer module.",
         )
 
@@ -677,6 +723,7 @@ class TestKeywordSearch:
 # ---------------------------------------------------------------------------
 # 16. Thread safety -- basic concurrent recording
 # ---------------------------------------------------------------------------
+
 
 class TestThreadSafety:
     def test_concurrent_decision_recording(self, tmp_path):
@@ -713,6 +760,7 @@ class TestThreadSafety:
 # 17. Foreign key enforcement
 # ---------------------------------------------------------------------------
 
+
 class TestForeignKeyEnforcement:
     def test_foreign_keys_enabled(self, tmp_path):
         """Verify that PRAGMA foreign_keys = ON is in effect."""
@@ -726,6 +774,7 @@ class TestForeignKeyEnforcement:
 # 18. DecisionType enum values
 # ---------------------------------------------------------------------------
 
+
 class TestDecisionTypeEnum:
     def test_all_values_present(self):
         expected = {"accepted", "rejected", "modified", "auto_approved", "reviewed"}
@@ -737,6 +786,7 @@ class TestDecisionTypeEnum:
 # 19. ChangeComplexity enum values
 # ---------------------------------------------------------------------------
 
+
 class TestChangeComplexityEnum:
     def test_values_are_integers(self):
         expected = {1, 2, 3, 5, 8}
@@ -747,6 +797,7 @@ class TestChangeComplexityEnum:
 # ---------------------------------------------------------------------------
 # 20. TrustLineageManager initialisation
 # ---------------------------------------------------------------------------
+
 
 class TestManagerInit:
     def test_creates_database_file(self, tmp_path):
@@ -765,6 +816,7 @@ class TestManagerInit:
 # ---------------------------------------------------------------------------
 # 21. get_agent_summary() output format
 # ---------------------------------------------------------------------------
+
 
 class TestAgentSummary:
     def test_summary_for_existing_agent(self, tmp_path):
@@ -797,6 +849,7 @@ class TestAgentSummary:
 # ---------------------------------------------------------------------------
 # 22. get_decision_with_lineage() returns correct structure
 # ---------------------------------------------------------------------------
+
 
 class TestGetDecisionWithLineage:
     def test_structure_fields(self, tmp_path):
@@ -857,16 +910,19 @@ class TestGetDecisionWithLineage:
 # ReasoningRecord.to_dict, agent history retrieval
 # ---------------------------------------------------------------------------
 
+
 class TestTrustScoreValidation:
     def test_rejects_score_out_of_range(self):
         with pytest.raises(ValueError):
-            TrustScore(score=1.5, confidence=0.5, sample_count=1,
-                       last_updated=datetime.now(timezone.utc))
+            TrustScore(
+                score=1.5, confidence=0.5, sample_count=1, last_updated=datetime.now(timezone.utc)
+            )
 
     def test_rejects_confidence_out_of_range(self):
         with pytest.raises(ValueError):
-            TrustScore(score=0.5, confidence=-0.1, sample_count=1,
-                       last_updated=datetime.now(timezone.utc))
+            TrustScore(
+                score=0.5, confidence=-0.1, sample_count=1, last_updated=datetime.now(timezone.utc)
+            )
 
 
 class TestDecisionRecordToDict:
@@ -885,9 +941,16 @@ class TestDecisionRecordToDict:
         )
         d = record.to_dict()
         assert set(d.keys()) == {
-            "record_id", "agent_id", "decision_type", "commit_hash",
-            "timestamp", "review_time_ms", "change_size", "complexity",
-            "reviewer_notes", "reviewer_id",
+            "record_id",
+            "agent_id",
+            "decision_type",
+            "commit_hash",
+            "timestamp",
+            "review_time_ms",
+            "change_size",
+            "complexity",
+            "reviewer_notes",
+            "reviewer_id",
         }
         assert d["decision_type"] == "accepted"
 

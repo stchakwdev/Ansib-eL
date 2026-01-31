@@ -18,21 +18,17 @@ Tests cover:
 
 import asyncio
 import uuid
-from datetime import datetime, timezone
-from typing import Dict, List, Optional
 from unittest.mock import MagicMock
 
 import pytest
 
 from ansibel.tournament import (
     AgentConfig,
-    AgentManager,
     ArchivedSolution,
     AsyncAgentAdapter,
     ComplexityEvaluator,
     CompositeEvaluator,
     DiffPresenter,
-    EvaluationStrategy,
     RequirementMatchEvaluator,
     ReviewPresentation,
     SelectionMode,
@@ -45,7 +41,6 @@ from ansibel.tournament import (
     TournamentResult,
     TournamentStatus,
 )
-
 
 # =============================================================================
 # Mock Agent Manager
@@ -66,17 +61,17 @@ class MockAgentManager:
 
     def __init__(
         self,
-        execution_results: Optional[Dict[str, Solution]] = None,
-        fail_agents: Optional[set] = None,
-        timeout_agents: Optional[set] = None,
+        execution_results: dict[str, Solution] | None = None,
+        fail_agents: set | None = None,
+        timeout_agents: set | None = None,
         execution_delay: float = 0.0,
     ):
         self.execution_results = execution_results or {}
         self.fail_agents = fail_agents or set()
         self.timeout_agents = timeout_agents or set()
         self.execution_delay = execution_delay
-        self.spawned: List[str] = []
-        self.terminated: List[str] = []
+        self.spawned: list[str] = []
+        self.terminated: list[str] = []
 
     async def spawn_agent(self, config: AgentConfig) -> str:
         self.spawned.append(config.agent_id)
@@ -477,7 +472,9 @@ class TestEvaluationStrategies:
 
     async def test_complexity_evaluator_moderate_code(self):
         evaluator = ComplexityEvaluator()
-        solution = make_solution("a1", files_changed={"app.py": "x = 1\ny = 2\nz = 3\nw = 4\nv = 5\n"})
+        solution = make_solution(
+            "a1", files_changed={"app.py": "x = 1\ny = 2\nz = 3\nw = 4\nv = 5\n"}
+        )
         score = await evaluator.evaluate(solution, make_task())
         assert 0.0 <= score <= 1.0
         assert evaluator.name == "complexity"

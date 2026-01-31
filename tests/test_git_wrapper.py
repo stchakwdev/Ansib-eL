@@ -9,20 +9,19 @@ git repositories.
 """
 
 import json
-import os
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
 
-from ansibel.git_wrapper import AgentMetadata, GitWrapper, MergeResult
 from ansibel.exceptions import GitWrapperError
-
+from ansibel.git_wrapper import AgentMetadata, GitWrapper, MergeResult
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _git(repo_path: Path, *args: str) -> subprocess.CompletedProcess:
     """Run a git command inside *repo_path* and return the result."""
@@ -61,6 +60,7 @@ def _create_file(tmp_path: Path, name: str, content: str) -> Path:
 # ---------------------------------------------------------------------------
 # 1. init_repo
 # ---------------------------------------------------------------------------
+
 
 class TestInitRepo:
     """Tests for GitWrapper.init_repo()."""
@@ -110,31 +110,38 @@ class TestInitRepo:
 # 2. _validate_git_ref
 # ---------------------------------------------------------------------------
 
+
 class TestValidateGitRef:
     """Tests for GitWrapper._validate_git_ref()."""
 
-    @pytest.mark.parametrize("ref", [
-        "main",
-        "feature/foo",
-        "agent/abc-123/20240101-120000",
-        "release-1.0",
-        "v2.3.4",
-        "my_branch",
-    ])
+    @pytest.mark.parametrize(
+        "ref",
+        [
+            "main",
+            "feature/foo",
+            "agent/abc-123/20240101-120000",
+            "release-1.0",
+            "v2.3.4",
+            "my_branch",
+        ],
+    )
     def test_valid_refs_accepted(self, ref: str) -> None:
         assert GitWrapper._validate_git_ref(ref) == ref
 
-    @pytest.mark.parametrize("ref", [
-        "branch name",           # space
-        "branch;rm -rf /",       # semicollon / shell metachar
-        "foo..bar",              # double dot
-        "$(whoami)",             # command substitution
-        "branch\ttab",           # tab
-        "",                      # empty
-        "hello world",           # space
-        "bad&ref",               # ampersand
-        "bad|ref",               # pipe
-    ])
+    @pytest.mark.parametrize(
+        "ref",
+        [
+            "branch name",  # space
+            "branch;rm -rf /",  # semicollon / shell metachar
+            "foo..bar",  # double dot
+            "$(whoami)",  # command substitution
+            "branch\ttab",  # tab
+            "",  # empty
+            "hello world",  # space
+            "bad&ref",  # ampersand
+            "bad|ref",  # pipe
+        ],
+    )
     def test_invalid_refs_rejected(self, ref: str) -> None:
         with pytest.raises(GitWrapperError):
             GitWrapper._validate_git_ref(ref)
@@ -143,6 +150,7 @@ class TestValidateGitRef:
 # ---------------------------------------------------------------------------
 # 3. create_agent_branch
 # ---------------------------------------------------------------------------
+
 
 class TestCreateAgentBranch:
     """Tests for GitWrapper.create_agent_branch()."""
@@ -186,6 +194,7 @@ class TestCreateAgentBranch:
 # ---------------------------------------------------------------------------
 # 4. commit_with_metadata / commit_changes
 # ---------------------------------------------------------------------------
+
 
 class TestCommitWithMetadata:
     """Tests for GitWrapper.commit_with_metadata()."""
@@ -232,6 +241,7 @@ class TestCommitWithMetadata:
 # 5. _save_commit_metadata
 # ---------------------------------------------------------------------------
 
+
 class TestSaveCommitMetadata:
     """Tests for GitWrapper._save_commit_metadata()."""
 
@@ -257,6 +267,7 @@ class TestSaveCommitMetadata:
 # ---------------------------------------------------------------------------
 # 6. _atomic_write_json
 # ---------------------------------------------------------------------------
+
 
 class TestAtomicWriteJson:
     """Tests for GitWrapper._atomic_write_json()."""
@@ -285,6 +296,7 @@ class TestAtomicWriteJson:
 # 7. merge_agent_branch
 # ---------------------------------------------------------------------------
 
+
 class TestMergeAgentBranch:
     """Tests for GitWrapper.merge_agent_branch()."""
 
@@ -300,7 +312,7 @@ class TestMergeAgentBranch:
         _git(tmp_path, "commit", "-m", "agent work")
 
         # Switch back to the original branch (master/main)
-        default_branch = _git(tmp_path, "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
+        _git(tmp_path, "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
         # The original branch might be main or master depending on git config.
         # We stored it before switching, let's just go back to the first branch.
         branches_output = _git(tmp_path, "branch").stdout
@@ -335,12 +347,17 @@ class TestMergeAgentBranch:
 
         result = wrapper.merge_agent_branch(branch)
         assert result.success is False
-        assert len(result.conflicts) > 0 or "conflict" in result.message.lower() or "failed" in result.message.lower()
+        assert (
+            len(result.conflicts) > 0
+            or "conflict" in result.message.lower()
+            or "failed" in result.message.lower()
+        )
 
 
 # ---------------------------------------------------------------------------
 # 8. get_diff
 # ---------------------------------------------------------------------------
+
 
 class TestGetDiff:
     """Tests for GitWrapper.get_diff()."""
@@ -366,6 +383,7 @@ class TestGetDiff:
 # ---------------------------------------------------------------------------
 # 9. get_status
 # ---------------------------------------------------------------------------
+
 
 class TestGetStatus:
     """Tests for GitWrapper.get_status()."""
@@ -393,6 +411,7 @@ class TestGetStatus:
 # ---------------------------------------------------------------------------
 # 10. get_ai_enhanced_history
 # ---------------------------------------------------------------------------
+
 
 class TestGetAiEnhancedHistory:
     """Tests for GitWrapper.get_ai_enhanced_history()."""
@@ -422,7 +441,7 @@ class TestGetAiEnhancedHistory:
             prompt_hash="p",
             timestamp="2024-06-01T00:00:00Z",
         )
-        commit_hash = wrapper.commit_with_metadata("with meta", meta)
+        wrapper.commit_with_metadata("with meta", meta)
         history = wrapper.get_ai_enhanced_history(limit=5)
         # The most recent commit should have metadata
         latest = history[0]
@@ -443,16 +462,20 @@ class TestGetAiEnhancedHistory:
 # 11. Security: injected branch names
 # ---------------------------------------------------------------------------
 
+
 class TestSecurityInjection:
     """Security tests ensuring shell injection via branch names is blocked."""
 
-    @pytest.mark.parametrize("bad_id", [
-        "agent;rm -rf /",
-        "agent$(whoami)",
-        "agent`id`",
-        "agent | cat /etc/passwd",
-        "agent\nmalicious",
-    ])
+    @pytest.mark.parametrize(
+        "bad_id",
+        [
+            "agent;rm -rf /",
+            "agent$(whoami)",
+            "agent`id`",
+            "agent | cat /etc/passwd",
+            "agent\nmalicious",
+        ],
+    )
     def test_create_agent_branch_rejects_injected_id(self, tmp_path: Path, bad_id: str) -> None:
         wrapper = _init_wrapper(tmp_path)
         _make_initial_commit(tmp_path)
@@ -463,6 +486,7 @@ class TestSecurityInjection:
 # ---------------------------------------------------------------------------
 # 12. AgentMetadata roundtrip
 # ---------------------------------------------------------------------------
+
 
 class TestAgentMetadataRoundtrip:
     """Tests for AgentMetadata.to_dict / from_dict roundtrip."""
@@ -509,6 +533,7 @@ class TestAgentMetadataRoundtrip:
 # 13. MergeResult namedtuple fields
 # ---------------------------------------------------------------------------
 
+
 class TestMergeResult:
     """Tests for MergeResult namedtuple."""
 
@@ -533,6 +558,7 @@ class TestMergeResult:
 # ---------------------------------------------------------------------------
 # 14. list_agent_branches
 # ---------------------------------------------------------------------------
+
 
 class TestListAgentBranches:
     """Tests for GitWrapper.list_agent_branches()."""

@@ -9,13 +9,11 @@ import json
 import os
 import subprocess
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 
 import pytest
 from click.testing import CliRunner
 
-from ansibel.cli import cli, get_wrapper
-
+from ansibel.cli import cli
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -35,18 +33,29 @@ def _init_git_repo(path: Path) -> None:
     subprocess.run(["git", "init"], cwd=str(path), capture_output=True, check=True, env=env)
     subprocess.run(
         ["git", "config", "user.email", "test@ansibel.dev"],
-        cwd=str(path), capture_output=True, check=True, env=env,
+        cwd=str(path),
+        capture_output=True,
+        check=True,
+        env=env,
     )
     subprocess.run(
         ["git", "config", "user.name", "Test Author"],
-        cwd=str(path), capture_output=True, check=True, env=env,
+        cwd=str(path),
+        capture_output=True,
+        check=True,
+        env=env,
     )
     readme = path / "README.md"
     readme.write_text("# Test\n")
-    subprocess.run(["git", "add", "README.md"], cwd=str(path), capture_output=True, check=True, env=env)
+    subprocess.run(
+        ["git", "add", "README.md"], cwd=str(path), capture_output=True, check=True, env=env
+    )
     subprocess.run(
         ["git", "commit", "-m", "Initial commit"],
-        cwd=str(path), capture_output=True, check=True, env=env,
+        cwd=str(path),
+        capture_output=True,
+        check=True,
+        env=env,
     )
 
 
@@ -66,6 +75,7 @@ def _init_ai_git(path: Path) -> None:
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def repo_dir(tmp_path: Path) -> Path:
     """Return a tmp directory with git init + initial commit + ai-git init."""
@@ -79,6 +89,7 @@ def repo_dir(tmp_path: Path) -> Path:
 # ---------------------------------------------------------------------------
 # 1. init command -- initialise repository
 # ---------------------------------------------------------------------------
+
 
 class TestInitCommand:
     def test_init_creates_ai_git_dir(self, tmp_path: Path) -> None:
@@ -127,6 +138,7 @@ class TestInitCommand:
 # 2. status command
 # ---------------------------------------------------------------------------
 
+
 class TestStatusCommand:
     def test_status_shows_branch(self, repo_dir: Path) -> None:
         runner = CliRunner()
@@ -160,6 +172,7 @@ class TestStatusCommand:
 # 3. branch command
 # ---------------------------------------------------------------------------
 
+
 class TestBranchCommand:
     def test_branch_creates_agent_branch(self, repo_dir: Path) -> None:
         runner = CliRunner()
@@ -178,6 +191,7 @@ class TestBranchCommand:
 # 4. commit command
 # ---------------------------------------------------------------------------
 
+
 class TestCommitCommand:
     def test_commit_with_metadata(self, repo_dir: Path) -> None:
         # Create a file to commit
@@ -185,18 +199,31 @@ class TestCommitCommand:
         test_file.write_text("# new feature\n")
 
         env = {**os.environ, **GIT_ENV}
-        subprocess.run(["git", "add", "feature.py"], cwd=str(repo_dir), capture_output=True, check=True, env=env)
+        subprocess.run(
+            ["git", "add", "feature.py"],
+            cwd=str(repo_dir),
+            capture_output=True,
+            check=True,
+            env=env,
+        )
 
         runner = CliRunner()
         saved = os.getcwd()
         try:
             os.chdir(str(repo_dir))
-            result = runner.invoke(cli, [
-                "commit", "Add feature file",
-                "--agent-id", "agent-001",
-                "--model-version", "gpt-4",
-                "--confidence", "0.95",
-            ])
+            result = runner.invoke(
+                cli,
+                [
+                    "commit",
+                    "Add feature file",
+                    "--agent-id",
+                    "agent-001",
+                    "--model-version",
+                    "gpt-4",
+                    "--confidence",
+                    "0.95",
+                ],
+            )
         finally:
             os.chdir(saved)
 
@@ -207,6 +234,7 @@ class TestCommitCommand:
 # ---------------------------------------------------------------------------
 # 5. merge command
 # ---------------------------------------------------------------------------
+
 
 class TestMergeCommand:
     def test_merge_nonexistent_branch_fails(self, repo_dir: Path) -> None:
@@ -219,12 +247,17 @@ class TestMergeCommand:
             os.chdir(saved)
 
         # Should fail with non-zero exit or error message
-        assert result.exit_code != 0 or "failed" in result.output.lower() or "error" in result.output.lower()
+        assert (
+            result.exit_code != 0
+            or "failed" in result.output.lower()
+            or "error" in result.output.lower()
+        )
 
 
 # ---------------------------------------------------------------------------
 # 6. history command
 # ---------------------------------------------------------------------------
+
 
 class TestHistoryCommand:
     def test_history_shows_commits(self, repo_dir: Path) -> None:
@@ -238,7 +271,11 @@ class TestHistoryCommand:
 
         assert result.exit_code == 0
         # Should display something (header at minimum)
-        assert "History" in result.output or "commit" in result.output.lower() or len(result.output) > 0
+        assert (
+            "History" in result.output
+            or "commit" in result.output.lower()
+            or len(result.output) > 0
+        )
 
     def test_history_json_output(self, repo_dir: Path) -> None:
         runner = CliRunner()
@@ -257,6 +294,7 @@ class TestHistoryCommand:
 # ---------------------------------------------------------------------------
 # 7. agents command
 # ---------------------------------------------------------------------------
+
 
 class TestAgentsCommand:
     def test_agents_list_empty(self, repo_dir: Path) -> None:
@@ -288,6 +326,7 @@ class TestAgentsCommand:
 # 8. trust command
 # ---------------------------------------------------------------------------
 
+
 class TestTrustCommand:
     def test_trust_update_score(self, repo_dir: Path) -> None:
         runner = CliRunner()
@@ -306,6 +345,7 @@ class TestTrustCommand:
 # 9. diff command
 # ---------------------------------------------------------------------------
 
+
 class TestDiffCommand:
     def test_diff_single_branch_arg(self, repo_dir: Path) -> None:
         """diff with one argument compares that branch against current."""
@@ -317,7 +357,10 @@ class TestDiffCommand:
             env = {**os.environ, **GIT_ENV}
             branch_result = subprocess.run(
                 ["git", "branch", "--show-current"],
-                cwd=str(repo_dir), capture_output=True, text=True, env=env,
+                cwd=str(repo_dir),
+                capture_output=True,
+                text=True,
+                env=env,
             )
             current = branch_result.stdout.strip()
             result = runner.invoke(cli, ["diff", current])
@@ -331,6 +374,7 @@ class TestDiffCommand:
 # ---------------------------------------------------------------------------
 # 10. JSON output mode (status --json-output)
 # ---------------------------------------------------------------------------
+
 
 class TestJsonOutputMode:
     def test_status_json_is_valid(self, repo_dir: Path) -> None:
@@ -351,6 +395,7 @@ class TestJsonOutputMode:
 # ---------------------------------------------------------------------------
 # 11. Error on uninitialised repo
 # ---------------------------------------------------------------------------
+
 
 class TestUninitialised:
     def test_status_fails_without_init(self, tmp_path: Path) -> None:
@@ -390,6 +435,7 @@ class TestUninitialised:
 # 12. Help text output
 # ---------------------------------------------------------------------------
 
+
 class TestHelpText:
     def test_main_help(self) -> None:
         runner = CliRunner()
@@ -408,6 +454,7 @@ class TestHelpText:
 # 13. Version output
 # ---------------------------------------------------------------------------
 
+
 class TestVersion:
     def test_version_flag(self) -> None:
         runner = CliRunner()
@@ -419,6 +466,7 @@ class TestVersion:
 # ---------------------------------------------------------------------------
 # 14. Metadata command
 # ---------------------------------------------------------------------------
+
 
 class TestMetadataCommand:
     def test_metadata_no_metadata_warns(self, repo_dir: Path) -> None:
@@ -438,6 +486,7 @@ class TestMetadataCommand:
 # ---------------------------------------------------------------------------
 # 15. Review command -- no pending branches
 # ---------------------------------------------------------------------------
+
 
 class TestReviewCommand:
     def test_review_no_pending(self, repo_dir: Path) -> None:

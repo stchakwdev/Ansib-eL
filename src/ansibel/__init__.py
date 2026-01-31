@@ -6,38 +6,36 @@ This package provides AI-native extensions to Git for tracking agent decisions
 and maintaining branch isolation for ephemeral agent workspaces.
 """
 
-__version__ = '1.0.0'
-__author__ = 'Ansib-eL Team'
-
-from ansibel.exceptions import (
-    AnsibElError,
-    GitWrapperError,
-    TournamentError,
-    TrustError,
-    AgentError,
-)
-
-from ansibel.git_wrapper import (
-    GitWrapper,
-    AgentMetadata,
-    MergeResult,
-)
+__version__ = "1.0.0"
+__author__ = "Ansib-eL Team"
 
 from ansibel.cli import (
     main,
 )
+from ansibel.exceptions import (
+    AgentError,
+    AnsibElError,
+    GitWrapperError,
+    TournamentError,
+    TrustError,
+)
+from ansibel.git_wrapper import (
+    AgentMetadata,
+    GitWrapper,
+    MergeResult,
+)
 
 __all__ = [
     # Exceptions
-    'AnsibElError',
-    'GitWrapperError',
-    'TournamentError',
-    'TrustError',
-    'AgentError',
+    "AnsibElError",
+    "GitWrapperError",
+    "TournamentError",
+    "TrustError",
+    "AgentError",
     # Git
-    'GitWrapper',
-    'AgentMetadata',
-    'MergeResult',
+    "GitWrapper",
+    "AgentMetadata",
+    "MergeResult",
     # CLI
-    'main',
+    "main",
 ]

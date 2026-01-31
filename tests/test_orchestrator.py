@@ -12,24 +12,16 @@ Tests cover:
 """
 
 import json
-import os
-from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
 from ansibel.orchestrator import (
     AgentId,
-    AgentInterface,
-    ApprovalRequest,
     ApprovalResult,
     BranchProtectionLevel,
     CodeChange,
-    DelegationResult,
-    GitWrapperInterface,
-    HumanInterface,
     MergeResult,
     MergeStatus,
     Orchestrator,
@@ -39,9 +31,7 @@ from ansibel.orchestrator import (
     TaskId,
     TaskPriority,
     TaskStatus,
-    TournamentInterface,
 )
-
 
 # =============================================================================
 # Mock / Fake Helpers
@@ -55,19 +45,19 @@ class FakeGitWrapper:
         self._branch = branch
         self._last_commit = last_commit
         self._clean = clean
-        self._protections: Dict[str, BranchProtectionLevel] = {}
+        self._protections: dict[str, BranchProtectionLevel] = {}
 
     def get_current_branch(self) -> str:
         return self._branch
 
-    def create_branch(self, branch_name: str, from_branch: Optional[str] = None) -> bool:
+    def create_branch(self, branch_name: str, from_branch: str | None = None) -> bool:
         return True
 
     def checkout_branch(self, branch_name: str) -> bool:
         self._branch = branch_name
         return True
 
-    def commit_changes(self, message: str, files: Optional[List[str]] = None) -> str:
+    def commit_changes(self, message: str, files: list[str] | None = None) -> str:
         return "deadbeef"
 
     def merge_branch(self, branch_name: str, strategy: str = "recursive") -> MergeResult:
@@ -77,7 +67,7 @@ class FakeGitWrapper:
             message="Merged",
         )
 
-    def get_last_commit(self) -> Optional[str]:
+    def get_last_commit(self) -> str | None:
         return self._last_commit
 
     def is_working_tree_clean(self) -> bool:
@@ -94,7 +84,12 @@ class FakeGitWrapper:
 class FakeAgent:
     """Fake agent that satisfies AgentInterface."""
 
-    def __init__(self, agent_id: Optional[AgentId] = None, capabilities: Optional[List[str]] = None, can_handle_all: bool = True):
+    def __init__(
+        self,
+        agent_id: AgentId | None = None,
+        capabilities: list[str] | None = None,
+        can_handle_all: bool = True,
+    ):
         self._id = agent_id or AgentId()
         self._capabilities = capabilities or ["coding"]
         self._can_handle_all = can_handle_all
@@ -104,7 +99,7 @@ class FakeAgent:
         return self._id
 
     @property
-    def capabilities(self) -> List[str]:
+    def capabilities(self) -> list[str]:
         return self._capabilities
 
     def can_handle(self, task: Task) -> bool:
@@ -122,7 +117,7 @@ class FakeAgent:
         return TaskStatus.IDLE
 
 
-def _make_solution(task_id: Optional[TaskId] = None, agent_id: Optional[AgentId] = None) -> Solution:
+def _make_solution(task_id: TaskId | None = None, agent_id: AgentId | None = None) -> Solution:
     """Helper to create a Solution for tests."""
     return Solution(
         task_id=task_id or TaskId(),
@@ -229,11 +224,15 @@ class TestTaskExecutionOrder:
         """Tasks with linear dependencies should be ordered correctly."""
         task_a = Task(description="A", requirements=[], acceptance_criteria=[])
         task_b = Task(
-            description="B", requirements=[], acceptance_criteria=[],
+            description="B",
+            requirements=[],
+            acceptance_criteria=[],
             dependencies=[task_a.id],
         )
         task_c = Task(
-            description="C", requirements=[], acceptance_criteria=[],
+            description="C",
+            requirements=[],
+            acceptance_criteria=[],
             dependencies=[task_b.id],
         )
 
@@ -249,8 +248,7 @@ class TestTaskExecutionOrder:
     def test_independent_tasks_all_returned(self) -> None:
         """Tasks with no dependencies should all appear in the result."""
         tasks = [
-            Task(description=f"Task {i}", requirements=[], acceptance_criteria=[])
-            for i in range(4)
+            Task(description=f"Task {i}", requirements=[], acceptance_criteria=[]) for i in range(4)
         ]
         breakdown = TaskBreakdown(original_prompt="test", tasks=tasks)
 
@@ -545,7 +543,9 @@ class TestTaskDataStructures:
         """Task should only execute when all dependency IDs are in the completed set."""
         dep_id = TaskId()
         task = Task(
-            description="Test", requirements=[], acceptance_criteria=[],
+            description="Test",
+            requirements=[],
+            acceptance_criteria=[],
             dependencies=[dep_id],
         )
 
@@ -573,12 +573,14 @@ class TestTaskDataStructures:
         """get_critical_tasks should return only CRITICAL priority tasks."""
         critical_task = Task(
             description="Critical",
-            requirements=[], acceptance_criteria=[],
+            requirements=[],
+            acceptance_criteria=[],
             priority=TaskPriority.CRITICAL,
         )
         medium_task = Task(
             description="Medium",
-            requirements=[], acceptance_criteria=[],
+            requirements=[],
+            acceptance_criteria=[],
             priority=TaskPriority.MEDIUM,
         )
         breakdown = TaskBreakdown(

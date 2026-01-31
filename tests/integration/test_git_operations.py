@@ -16,7 +16,6 @@ import os
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
-from uuid import uuid4
 
 import pytest
 
@@ -28,6 +27,7 @@ pytestmark = pytest.mark.integration
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _init_git_repo(repo_path: Path) -> None:
     """Initialise a git repo with an initial commit at *repo_path*."""
@@ -161,13 +161,11 @@ class TestFullGitWorkflow:
 
         # Find our commit in the history
         our_commits = [
-            h for h in history
-            if h.get("metadata") is not None
-            and h["metadata"].get("agent_id") == agent_id
+            h
+            for h in history
+            if h.get("metadata") is not None and h["metadata"].get("agent_id") == agent_id
         ]
-        assert len(our_commits) >= 1, (
-            "The commit with agent metadata should appear in history"
-        )
+        assert len(our_commits) >= 1, "The commit with agent metadata should appear in history"
 
 
 # ---------------------------------------------------------------------------
@@ -516,9 +514,7 @@ class TestMetadataPersistence:
         assert retrieved.prompt_hash == original_metadata.prompt_hash
         assert retrieved.timestamp == original_metadata.timestamp
         assert retrieved.parent_task == original_metadata.parent_task
-        assert retrieved.confidence_score == pytest.approx(
-            original_metadata.confidence_score
-        )
+        assert retrieved.confidence_score == pytest.approx(original_metadata.confidence_score)
         assert retrieved.reasoning == original_metadata.reasoning
         assert retrieved.tool_calls == original_metadata.tool_calls
 
@@ -594,9 +590,7 @@ class TestMetadataPersistence:
         # Verify each commit has its own distinct metadata
         for commit_hash, expected_agent_id, expected_model in commits:
             retrieved = gw.get_commit_metadata(commit_hash)
-            assert retrieved is not None, (
-                f"Metadata for commit {commit_hash[:8]} should exist"
-            )
+            assert retrieved is not None, f"Metadata for commit {commit_hash[:8]} should exist"
             assert retrieved.agent_id == expected_agent_id
             assert retrieved.model_version == expected_model
 

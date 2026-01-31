@@ -19,7 +19,6 @@ Covers:
 - Agent created_at timestamp
 """
 
-import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
@@ -36,12 +35,11 @@ from ansibel.agent_system import (
     AgentMetadata,
     AgentStatus,
 )
-from ansibel.exceptions import AgentContextError
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def storage_file(tmp_path):
@@ -69,6 +67,7 @@ def spawned_agent(manager):
 # ---------------------------------------------------------------------------
 # 1. Agent Spawn
 # ---------------------------------------------------------------------------
+
 
 class TestAgentSpawn:
     """Tests for spawning agents."""
@@ -120,6 +119,7 @@ class TestAgentSpawn:
 
     def test_spawn_agent_prompt_hash_is_sha256(self, manager):
         import hashlib
+
         prompt = "You are a helper."
         agent = manager.spawn_agent(
             purpose="Help",
@@ -161,6 +161,7 @@ class TestAgentSpawn:
 # 2-3. Get Agent by UUID / string, and listing
 # ---------------------------------------------------------------------------
 
+
 class TestAgentRetrieval:
     """Tests for retrieving agents."""
 
@@ -183,12 +184,8 @@ class TestAgentRetrieval:
         assert result is None
 
     def test_list_agents_by_status(self, manager):
-        manager.spawn_agent(
-            purpose="A", model_version="gpt-4", prompt="p", task_id="t1"
-        )
-        agent_b = manager.spawn_agent(
-            purpose="B", model_version="gpt-4", prompt="p", task_id="t2"
-        )
+        manager.spawn_agent(purpose="A", model_version="gpt-4", prompt="p", task_id="t1")
+        agent_b = manager.spawn_agent(purpose="B", model_version="gpt-4", prompt="p", task_id="t2")
         manager.update_agent_status(agent_b.agent_id, AgentStatus.WORKING)
 
         idle_agents = manager.list_agents_by_status(AgentStatus.IDLE)
@@ -215,6 +212,7 @@ class TestAgentRetrieval:
 # ---------------------------------------------------------------------------
 # 4. Status Transitions
 # ---------------------------------------------------------------------------
+
 
 class TestStatusTransitions:
     """Tests for agent status transitions."""
@@ -247,6 +245,7 @@ class TestStatusTransitions:
 # 5. Terminate Agent
 # ---------------------------------------------------------------------------
 
+
 class TestTerminateAgent:
     """Tests for agent termination."""
 
@@ -275,6 +274,7 @@ class TestTerminateAgent:
 # ---------------------------------------------------------------------------
 # 6. JSON Persistence (save/load roundtrip)
 # ---------------------------------------------------------------------------
+
 
 class TestJSONPersistence:
     """Tests for JSON storage roundtrip."""
@@ -315,6 +315,7 @@ class TestJSONPersistence:
 # 7. Corrupt JSON Recovery
 # ---------------------------------------------------------------------------
 
+
 class TestCorruptJSONRecovery:
     """Tests that the manager recovers gracefully from corrupt storage."""
 
@@ -340,6 +341,7 @@ class TestCorruptJSONRecovery:
 # ---------------------------------------------------------------------------
 # 8. Agent / AgentMetadata Serialization Roundtrip
 # ---------------------------------------------------------------------------
+
 
 class TestSerializationRoundtrip:
     """Tests for to_dict / from_dict / to_json / from_json."""
@@ -407,6 +409,7 @@ class TestSerializationRoundtrip:
 # 9. AgentContext Lifecycle (context manager)
 # ---------------------------------------------------------------------------
 
+
 class TestAgentContextLifecycle:
     """Tests for AgentContext enter/exit and activation."""
 
@@ -461,6 +464,7 @@ class TestAgentContextLifecycle:
 # 10. Workspace Paths
 # ---------------------------------------------------------------------------
 
+
 class TestWorkspacePaths:
     """Tests for workspace path construction."""
 
@@ -499,6 +503,7 @@ class TestWorkspacePaths:
 # ---------------------------------------------------------------------------
 # 11. Communication Bus
 # ---------------------------------------------------------------------------
+
 
 class TestCommunicationBus:
     """Tests for AgentCommunicationBus."""
@@ -598,6 +603,7 @@ class TestCommunicationBus:
 # 12. Path Traversal Rejection
 # ---------------------------------------------------------------------------
 
+
 class TestPathTraversalRejection:
     """Tests that path traversal attacks in agent_id are blocked."""
 
@@ -620,6 +626,7 @@ class TestPathTraversalRejection:
 # ---------------------------------------------------------------------------
 # 13. get_subprocess_env Returns a Copy
 # ---------------------------------------------------------------------------
+
 
 class TestSubprocessEnv:
     """Tests that get_subprocess_env returns a copy, not os.environ itself."""
@@ -660,6 +667,7 @@ class TestSubprocessEnv:
 # 14. AgentStatus Enum Values
 # ---------------------------------------------------------------------------
 
+
 class TestAgentStatusEnum:
     """Tests for the AgentStatus enum."""
 
@@ -677,6 +685,7 @@ class TestAgentStatusEnum:
 # ---------------------------------------------------------------------------
 # 15. Agent created_at Timestamp
 # ---------------------------------------------------------------------------
+
 
 class TestCreatedAtTimestamp:
     """Tests that created_at is set correctly."""
@@ -697,6 +706,7 @@ class TestCreatedAtTimestamp:
 # ---------------------------------------------------------------------------
 # Additional Edge-Case / Integration Tests
 # ---------------------------------------------------------------------------
+
 
 class TestAgentManagerStatistics:
     """Tests for the get_statistics helper."""
@@ -735,9 +745,7 @@ class TestCleanupTerminated:
     """Tests for cleanup_terminated."""
 
     def test_cleanup_all_terminated(self, manager):
-        a = manager.spawn_agent(
-            purpose="X", model_version="gpt-4", prompt="p", task_id="t"
-        )
+        a = manager.spawn_agent(purpose="X", model_version="gpt-4", prompt="p", task_id="t")
         manager.terminate_agent(a.agent_id, cleanup=False)
         removed = manager.cleanup_terminated()
         assert removed == 1
