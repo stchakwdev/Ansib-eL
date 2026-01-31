@@ -1,0 +1,171 @@
+{
+  "timestamp": "2026-01-30T23:05:20.423989+00:00",
+  "summary": {
+    "passed": 23,
+    "failed": 0,
+    "total": 23
+  },
+  "results": [
+    {
+      "scenario": "A",
+      "name": "A1: ai-git init",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "A",
+      "name": "A2: seed commit",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "A",
+      "name": "A3: agent-alpha branch + commit",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "A",
+      "name": "A4: agent-beta branch + commit",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "A",
+      "name": "A5: status + agents",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "A",
+      "name": "A6: history",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "A",
+      "name": "A7: trust update",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "A",
+      "name": "A8: merge agent-alpha to main",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "B",
+      "name": "B1: AnsibElSystem.initialize()",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "B",
+      "name": "B2: process_prompt(single-agent)",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "B",
+      "name": "B3: process_prompt(tournament)",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "B",
+      "name": "B4: list_pending_approvals()",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "B",
+      "name": "B5: review_and_approve()",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "B",
+      "name": "B6: get_status()",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "B",
+      "name": "B7: get_agent_info()",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "C",
+      "name": "C1: create tournament",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "C",
+      "name": "C2: run_tournament (all succeed)",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "C",
+      "name": "C3: run_tournament (with failures)",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "C",
+      "name": "C4: present_for_review + markdown",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "C",
+      "name": "C5: select_winner + archive_losers",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "D",
+      "name": "D1: record decisions + verify score/tier",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "D",
+      "name": "D2: record_complete_decision()",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    },
+    {
+      "scenario": "D",
+      "name": "D3: auto-approve threshold",
+      "passed": true,
+      "message": "OK",
+      "error": null
+    }
+  ]
+}
