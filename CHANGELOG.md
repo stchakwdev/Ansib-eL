@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0-beta] - 2025-01-30
+## [1.0.0-beta] - 2026-01-28
 
 ### Added
 
@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `AgentManager` storage path resolution for `src/` layout
 - Trust lineage time decay calculation for edge case with zero elapsed time
 
-## [1.0.0-alpha] - 2024-01-01
+## [1.0.0-alpha] - 2026-01-28
 
 ### Added
 - Initial release of Ansib-eL AI-Native Version Control System

@@ -30,7 +30,9 @@ GIT_ENV = {
 def _init_git_repo(path: Path) -> None:
     """Initialise a git repo with an initial commit at *path*."""
     env = {**os.environ, **GIT_ENV}
-    subprocess.run(["git", "init"], cwd=str(path), capture_output=True, check=True, env=env)
+    subprocess.run(
+        ["git", "init"], cwd=str(path), capture_output=True, check=True, env=env
+    )
     subprocess.run(
         ["git", "config", "user.email", "test@ansibel.dev"],
         cwd=str(path),
@@ -48,7 +50,11 @@ def _init_git_repo(path: Path) -> None:
     readme = path / "README.md"
     readme.write_text("# Test\n")
     subprocess.run(
-        ["git", "add", "README.md"], cwd=str(path), capture_output=True, check=True, env=env
+        ["git", "add", "README.md"],
+        cwd=str(path),
+        capture_output=True,
+        check=True,
+        env=env,
     )
     subprocess.run(
         ["git", "commit", "-m", "Initial commit"],
@@ -119,7 +125,10 @@ class TestInitCommand:
             os.chdir(saved)
 
         assert result.exit_code == 0
-        assert "already initialized" in result.output.lower() or "already" in result.output.lower()
+        assert (
+            "already initialized" in result.output.lower()
+            or "already" in result.output.lower()
+        )
 
     def test_init_force_reinitialises(self, repo_dir: Path) -> None:
         runner = CliRunner()
@@ -179,7 +188,9 @@ class TestBranchCommand:
         saved = os.getcwd()
         try:
             os.chdir(str(repo_dir))
-            result = runner.invoke(cli, ["branch", "agent-001", "--purpose", "Fix login bug"])
+            result = runner.invoke(
+                cli, ["branch", "agent-001", "--purpose", "Fix login bug"]
+            )
         finally:
             os.chdir(saved)
 
@@ -475,7 +486,9 @@ class TestMetadataCommand:
         saved = os.getcwd()
         try:
             os.chdir(str(repo_dir))
-            result = runner.invoke(cli, ["metadata", "0000000000000000000000000000000000000000"])
+            result = runner.invoke(
+                cli, ["metadata", "0000000000000000000000000000000000000000"]
+            )
         finally:
             os.chdir(saved)
 

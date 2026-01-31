@@ -170,7 +170,9 @@ class Solution:
             "metrics": self.metrics,
             "status": self.status.value,
             "created_at": self.created_at.isoformat(),
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "completed_at": (
+                self.completed_at.isoformat() if self.completed_at else None
+            ),
             "execution_time_ms": self.execution_time_ms,
             "test_results": self.test_results,
         }
@@ -212,7 +214,9 @@ class Tournament:
 
     def get_completed_solutions(self) -> list[Solution]:
         """Get all successfully completed solutions."""
-        return [s for s in self.solutions.values() if s.status == SolutionStatus.COMPLETED]
+        return [
+            s for s in self.solutions.values() if s.status == SolutionStatus.COMPLETED
+        ]
 
     def get_failed_solutions(self) -> list[Solution]:
         """Get all failed/timed out solutions."""
@@ -514,10 +518,20 @@ class RequirementMatchEvaluator(EvaluationStrategy):
         for req in task.requirements:
             req_lower = req.lower()
             # Check if requirement keywords appear in solution
-            req_keywords = set(req_lower.split()) - {"the", "a", "an", "to", "of", "in", "and"}
+            req_keywords = set(req_lower.split()) - {
+                "the",
+                "a",
+                "an",
+                "to",
+                "of",
+                "in",
+                "and",
+            }
             if req_keywords:
                 match_count = sum(
-                    1 for kw in req_keywords if kw in explanation_lower or kw in diff_lower
+                    1
+                    for kw in req_keywords
+                    if kw in explanation_lower or kw in diff_lower
                 )
                 matches += match_count / len(req_keywords)
 
@@ -683,9 +697,11 @@ class DiffPresenter:
                 [
                     "",
                     "Explanation:",
-                    solution.explanation[:500] + "..."
-                    if len(solution.explanation) > 500
-                    else solution.explanation,
+                    (
+                        solution.explanation[:500] + "..."
+                        if len(solution.explanation) > 500
+                        else solution.explanation
+                    ),
                 ]
             )
 
@@ -874,7 +890,8 @@ class TournamentOrchestrator:
         tournament.started_at = datetime.now(timezone.utc)
 
         self._notify_progress(
-            tournament_id, {"status": "started", "total_agents": len(tournament.agent_configs)}
+            tournament_id,
+            {"status": "started", "total_agents": len(tournament.agent_configs)},
         )
 
         # Create semaphore for limiting concurrent execution
@@ -940,7 +957,8 @@ class TournamentOrchestrator:
         }
 
         self._notify_progress(
-            tournament_id, {"status": "completed", "execution_summary": execution_summary}
+            tournament_id,
+            {"status": "completed", "execution_summary": execution_summary},
         )
 
         # Auto-select winner if mode is AUTO_BEST or THRESHOLD
@@ -1031,7 +1049,9 @@ class TournamentOrchestrator:
             recommendations=recommendations,
         )
 
-    async def select_winner(self, tournament_id: str, winner_id: str | None = None) -> Solution:
+    async def select_winner(
+        self, tournament_id: str, winner_id: str | None = None
+    ) -> Solution:
         """Select the winning solution from a tournament.
 
         If winner_id is provided, that solution is selected. Otherwise,
@@ -1063,7 +1083,9 @@ class TournamentOrchestrator:
 
         tournament.winner_id = winner.solution_id
 
-        logger.info(f"Selected winner {winner.solution_id} from tournament {tournament_id}")
+        logger.info(
+            f"Selected winner {winner.solution_id} from tournament {tournament_id}"
+        )
 
         return winner
 
@@ -1141,7 +1163,9 @@ class TournamentOrchestrator:
 
             archived.append(archive)
 
-        logger.info(f"Archived {len(archived)} solutions from tournament {tournament_id}")
+        logger.info(
+            f"Archived {len(archived)} solutions from tournament {tournament_id}"
+        )
 
         return archived
 
@@ -1169,7 +1193,9 @@ class TournamentOrchestrator:
 
         return True
 
-    def register_progress_callback(self, callback: Callable[[str, dict[str, Any]], None]) -> None:
+    def register_progress_callback(
+        self, callback: Callable[[str, dict[str, Any]], None]
+    ) -> None:
         """Register a callback for progress updates.
 
         Args:
@@ -1177,7 +1203,9 @@ class TournamentOrchestrator:
         """
         self._progress_callbacks.append(callback)
 
-    def unregister_progress_callback(self, callback: Callable[[str, dict[str, Any]], None]) -> None:
+    def unregister_progress_callback(
+        self, callback: Callable[[str, dict[str, Any]], None]
+    ) -> None:
         """Unregister a progress callback."""
         if callback in self._progress_callbacks:
             self._progress_callbacks.remove(callback)
@@ -1208,7 +1236,9 @@ class TournamentOrchestrator:
     ) -> Solution:
         """Execute an agent with semaphore-controlled concurrency."""
         async with semaphore:
-            return await self._execute_agent_safe(tournament_id, config, task, cancel_token)
+            return await self._execute_agent_safe(
+                tournament_id, config, task, cancel_token
+            )
 
     async def _execute_agent_safe(
         self,
@@ -1256,7 +1286,9 @@ class TournamentOrchestrator:
 
         except asyncio.TimeoutError:
             execution_time = (time.time() - start_time) * 1000
-            logger.warning(f"Agent {config.agent_id} timed out after {config.timeout_seconds}s")
+            logger.warning(
+                f"Agent {config.agent_id} timed out after {config.timeout_seconds}s"
+            )
 
             self._notify_progress(
                 tournament_id, {"status": "agent_timeout", "agent_id": config.agent_id}
@@ -1276,7 +1308,11 @@ class TournamentOrchestrator:
 
             self._notify_progress(
                 tournament_id,
-                {"status": "agent_failed", "agent_id": config.agent_id, "error": str(e)},
+                {
+                    "status": "agent_failed",
+                    "agent_id": config.agent_id,
+                    "error": str(e),
+                },
             )
 
             return Solution(
@@ -1340,9 +1376,12 @@ class TournamentOrchestrator:
             "other_files": len(other.files_changed),
             "winner_execution_time": winner.execution_time_ms,
             "other_execution_time": other.execution_time_ms,
-            "common_files": set(winner.files_changed.keys()) & set(other.files_changed.keys()),
-            "winner_only_files": set(winner.files_changed.keys()) - set(other.files_changed.keys()),
-            "other_only_files": set(other.files_changed.keys()) - set(winner.files_changed.keys()),
+            "common_files": set(winner.files_changed.keys())
+            & set(other.files_changed.keys()),
+            "winner_only_files": set(winner.files_changed.keys())
+            - set(other.files_changed.keys()),
+            "other_only_files": set(other.files_changed.keys())
+            - set(winner.files_changed.keys()),
         }
 
     def _generate_recommendations(self, tournament: Tournament) -> list[str]:

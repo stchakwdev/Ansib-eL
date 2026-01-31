@@ -121,7 +121,9 @@ class MockGitWrapper:
 
     # -- Merge operations ----------------------------------------------------
 
-    def merge_branch(self, branch_name: str, strategy: str = "recursive") -> GitMergeResult:
+    def merge_branch(
+        self, branch_name: str, strategy: str = "recursive"
+    ) -> GitMergeResult:
         if branch_name not in self._branches:
             return GitMergeResult(
                 success=False,
@@ -246,7 +248,9 @@ class MockAgent:
         self.prompt_hash = hashlib.sha256(purpose.encode()).hexdigest()
         self.created_at = datetime.now(timezone.utc)
         self.status = status
-        self.workspace_branch = workspace_branch or f"agent/{str(self.agent_id)[:8]}/mock"
+        self.workspace_branch = (
+            workspace_branch or f"agent/{str(self.agent_id)[:8]}/mock"
+        )
 
     def to_dict(self) -> dict[str, Any]:
         return {

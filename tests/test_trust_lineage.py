@@ -915,13 +915,19 @@ class TestTrustScoreValidation:
     def test_rejects_score_out_of_range(self):
         with pytest.raises(ValueError):
             TrustScore(
-                score=1.5, confidence=0.5, sample_count=1, last_updated=datetime.now(timezone.utc)
+                score=1.5,
+                confidence=0.5,
+                sample_count=1,
+                last_updated=datetime.now(timezone.utc),
             )
 
     def test_rejects_confidence_out_of_range(self):
         with pytest.raises(ValueError):
             TrustScore(
-                score=0.5, confidence=-0.1, sample_count=1, last_updated=datetime.now(timezone.utc)
+                score=0.5,
+                confidence=-0.1,
+                sample_count=1,
+                last_updated=datetime.now(timezone.utc),
             )
 
 

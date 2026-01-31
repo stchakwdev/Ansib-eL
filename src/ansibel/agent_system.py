@@ -51,7 +51,9 @@ if HAS_PYDANTIC:
         """Pydantic model for agent data validation."""
 
         agent_id: str = Field(..., description="Unique UUID for the agent")
-        purpose: str = Field(..., min_length=1, max_length=500, description="Agent's purpose/task")
+        purpose: str = Field(
+            ..., min_length=1, max_length=500, description="Agent's purpose/task"
+        )
         model_version: str = Field(..., min_length=1, description="AI model version")
         prompt_hash: str = Field(
             ..., min_length=32, max_length=64, description="SHA-256 hash of the prompt"
@@ -77,7 +79,9 @@ if HAS_PYDANTIC:
         def validate_status(cls, v: str) -> str:
             valid_statuses = {"IDLE", "WORKING", "COMPLETED", "FAILED", "TERMINATED"}
             if v.upper() not in valid_statuses:
-                raise ValueError(f"Invalid status: {v}. Must be one of {valid_statuses}")
+                raise ValueError(
+                    f"Invalid status: {v}. Must be one of {valid_statuses}"
+                )
             return v.upper()
 
         @field_validator("created_at")
@@ -169,9 +173,9 @@ class AgentMetadata:
 
     def generate_task_signature(self, task_description: str) -> str:
         """Generate a unique task signature based on task description."""
-        signature = hashlib.sha256(f"{str(self.agent_id)}:{task_description}".encode()).hexdigest()[
-            :16
-        ]
+        signature = hashlib.sha256(
+            f"{str(self.agent_id)}:{task_description}".encode()
+        ).hexdigest()[:16]
         self.task_signature = signature
         return signature
 
@@ -290,7 +294,9 @@ class AgentContext:
         """
         self.agent_id = agent_id
         if base_workspace_path is None:
-            base_workspace_path = os.path.join(tempfile.gettempdir(), "ansibel", "agents")
+            base_workspace_path = os.path.join(
+                tempfile.gettempdir(), "ansibel", "agents"
+            )
         self.base_workspace_path = Path(base_workspace_path)
         self.workspace_path = self.base_workspace_path / str(agent_id)
 
@@ -314,7 +320,9 @@ class AgentContext:
         (self.workspace_path / "logs").mkdir(exist_ok=True)
         (self.workspace_path / "artifacts").mkdir(exist_ok=True)
 
-        logger.info(f"Initialized workspace for agent {self.agent_id} at {self.workspace_path}")
+        logger.info(
+            f"Initialized workspace for agent {self.agent_id} at {self.workspace_path}"
+        )
 
     def set_env_var(self, key: str, value: str) -> None:
         """Set an environment variable for this agent context."""
@@ -341,7 +349,9 @@ class AgentContext:
         os.environ["ANSIBEL_WORKSPACE"] = str(self.workspace_path)
         os.environ["ANSIBEL_WORKSPACE_WORK"] = str(self.workspace_path / "workspace")
         os.environ["ANSIBEL_WORKSPACE_LOGS"] = str(self.workspace_path / "logs")
-        os.environ["ANSIBEL_WORKSPACE_ARTIFACTS"] = str(self.workspace_path / "artifacts")
+        os.environ["ANSIBEL_WORKSPACE_ARTIFACTS"] = str(
+            self.workspace_path / "artifacts"
+        )
 
         # Apply custom environment variables
         for key, value in self.env_vars.items():
@@ -542,7 +552,11 @@ class AgentManager:
         Returns:
             List of active agents
         """
-        return [agent for agent in self.agents.values() if agent.status != AgentStatus.TERMINATED]
+        return [
+            agent
+            for agent in self.agents.values()
+            if agent.status != AgentStatus.TERMINATED
+        ]
 
     def list_all_agents(self) -> list[Agent]:
         """
@@ -600,7 +614,9 @@ class AgentManager:
         # Persist changes
         self._save_agents()
 
-        logger.info(f"Agent {agent_id} status changed: {old_status.value} -> {status.value}")
+        logger.info(
+            f"Agent {agent_id} status changed: {old_status.value} -> {status.value}"
+        )
         return True
 
     def terminate_agent(self, agent_id: UUID, cleanup: bool = True) -> bool:
@@ -649,7 +665,9 @@ class AgentManager:
         """Persist all agents to storage."""
         data = {
             "agents": {str(k): v.to_dict() for k, v in self.agents.items()},
-            "agents_by_task": {k: [str(aid) for aid in v] for k, v in self._agents_by_task.items()},
+            "agents_by_task": {
+                k: [str(aid) for aid in v] for k, v in self._agents_by_task.items()
+            },
         }
 
         with open(self.storage_path, "w") as f:
@@ -684,7 +702,8 @@ class AgentManager:
             "total_agents": len(self.agents),
             "active_agents": len(self.list_active_agents()),
             "by_status": {
-                status.value: len(self.list_agents_by_status(status)) for status in AgentStatus
+                status.value: len(self.list_agents_by_status(status))
+                for status in AgentStatus
             },
             "total_tasks": len(self._agents_by_task),
         }
@@ -767,7 +786,9 @@ class AgentMessage:
             message_type=data["message_type"],
             payload=data["payload"],
             timestamp=datetime.fromisoformat(data["timestamp"]),
-            correlation_id=UUID(data["correlation_id"]) if data.get("correlation_id") else None,
+            correlation_id=(
+                UUID(data["correlation_id"]) if data.get("correlation_id") else None
+            ),
         )
 
 

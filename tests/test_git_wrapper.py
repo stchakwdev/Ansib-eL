@@ -316,7 +316,9 @@ class TestMergeAgentBranch:
         # The original branch might be main or master depending on git config.
         # We stored it before switching, let's just go back to the first branch.
         branches_output = _git(tmp_path, "branch").stdout
-        all_branches = [b.strip().lstrip("* ") for b in branches_output.strip().splitlines()]
+        all_branches = [
+            b.strip().lstrip("* ") for b in branches_output.strip().splitlines()
+        ]
         original = [b for b in all_branches if not b.startswith("agent/")][0]
         _git(tmp_path, "checkout", original)
 
@@ -476,7 +478,9 @@ class TestSecurityInjection:
             "agent\nmalicious",
         ],
     )
-    def test_create_agent_branch_rejects_injected_id(self, tmp_path: Path, bad_id: str) -> None:
+    def test_create_agent_branch_rejects_injected_id(
+        self, tmp_path: Path, bad_id: str
+    ) -> None:
         wrapper = _init_wrapper(tmp_path)
         _make_initial_commit(tmp_path)
         with pytest.raises(GitWrapperError):
@@ -538,7 +542,9 @@ class TestMergeResult:
     """Tests for MergeResult namedtuple."""
 
     def test_fields_accessible(self) -> None:
-        r = MergeResult(success=True, message="ok", conflicts=[], merged_commit="abc123")
+        r = MergeResult(
+            success=True, message="ok", conflicts=[], merged_commit="abc123"
+        )
         assert r.success is True
         assert r.message == "ok"
         assert r.conflicts == []

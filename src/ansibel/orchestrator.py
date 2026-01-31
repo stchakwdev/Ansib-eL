@@ -194,7 +194,9 @@ class Task:
             "status": self.status.name,
             "assigned_agent": str(self.assigned_agent) if self.assigned_agent else None,
             "created_at": self.created_at.isoformat(),
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "completed_at": (
+                self.completed_at.isoformat() if self.completed_at else None
+            ),
         }
 
 
@@ -446,7 +448,9 @@ class GitWrapperInterface(Protocol):
         """Commit changes and return commit hash."""
         ...
 
-    def merge_branch(self, branch_name: str, strategy: str = "recursive") -> MergeResult:
+    def merge_branch(
+        self, branch_name: str, strategy: str = "recursive"
+    ) -> MergeResult:
         """Merge a branch into current branch."""
         ...
 
@@ -471,7 +475,9 @@ class GitWrapperInterface(Protocol):
         """Get protection level for a branch."""
         ...
 
-    def set_branch_protection(self, branch_name: str, level: BranchProtectionLevel) -> bool:
+    def set_branch_protection(
+        self, branch_name: str, level: BranchProtectionLevel
+    ) -> bool:
         """Set protection level for a branch."""
         ...
 
@@ -509,7 +515,9 @@ class TournamentInterface(Protocol):
         """Register an agent for tournament participation."""
         ...
 
-    def execute_parallel(self, task: Task, agents: list[AgentInterface]) -> list[Solution]:
+    def execute_parallel(
+        self, task: Task, agents: list[AgentInterface]
+    ) -> list[Solution]:
         """Execute task with multiple agents in parallel."""
         ...
 
@@ -777,9 +785,15 @@ class Orchestrator:
         git = self._get_git_wrapper()
 
         with self._task_lock:
-            active = sum(1 for t in self._tasks.values() if t.status == TaskStatus.IN_PROGRESS)
-            completed = sum(1 for t in self._tasks.values() if t.status == TaskStatus.COMPLETED)
-            failed = sum(1 for t in self._tasks.values() if t.status == TaskStatus.FAILED)
+            active = sum(
+                1 for t in self._tasks.values() if t.status == TaskStatus.IN_PROGRESS
+            )
+            completed = sum(
+                1 for t in self._tasks.values() if t.status == TaskStatus.COMPLETED
+            )
+            failed = sum(
+                1 for t in self._tasks.values() if t.status == TaskStatus.FAILED
+            )
 
         current_branch = git.get_current_branch()
 
@@ -906,7 +920,9 @@ class Orchestrator:
             # Attempt merge
             merge_result = self._execute_merge(found.solution, reviewer)
             merged_commit = (
-                merge_result.commit_hash if merge_result.status == MergeStatus.MERGED else None
+                merge_result.commit_hash
+                if merge_result.status == MergeStatus.MERGED
+                else None
             )
 
             return ApprovalResult(
@@ -1071,8 +1087,14 @@ class Orchestrator:
             tasks.append(
                 Task(
                     description=f"Refactor: {prompt}",
-                    requirements=["Maintain existing behavior", "Improve code structure"],
-                    acceptance_criteria=["All existing tests pass", "Code quality improved"],
+                    requirements=[
+                        "Maintain existing behavior",
+                        "Improve code structure",
+                    ],
+                    acceptance_criteria=[
+                        "All existing tests pass",
+                        "Code quality improved",
+                    ],
                     priority=TaskPriority.MEDIUM,
                 )
             )
@@ -1085,7 +1107,11 @@ class Orchestrator:
                     priority=TaskPriority.HIGH,
                 )
             )
-        elif "add" in prompt_lower or "create" in prompt_lower or "implement" in prompt_lower:
+        elif (
+            "add" in prompt_lower
+            or "create" in prompt_lower
+            or "implement" in prompt_lower
+        ):
             tasks.append(
                 Task(
                     description=f"Add: {prompt}",
@@ -1094,7 +1120,11 @@ class Orchestrator:
                     priority=TaskPriority.MEDIUM,
                 )
             )
-        elif "update" in prompt_lower or "change" in prompt_lower or "modify" in prompt_lower:
+        elif (
+            "update" in prompt_lower
+            or "change" in prompt_lower
+            or "modify" in prompt_lower
+        ):
             tasks.append(
                 Task(
                     description=f"Update: {prompt}",
@@ -1208,7 +1238,9 @@ class Orchestrator:
 
         # If reviewer provided, try to process immediately
         if reviewer and self._human and self._human.is_available():
-            request = next((r for r in self._approval_queue.queue if r.id == approval_id), None)
+            request = next(
+                (r for r in self._approval_queue.queue if r.id == approval_id), None
+            )
             if request and self._human.request_approval(request):
                 # Approved - proceed with merge
                 return self._execute_merge(solution, reviewer)
@@ -1262,7 +1294,11 @@ class Orchestrator:
                 gw_result = git.merge_agent_branch(solution.workspace_branch)
                 if not gw_result.success:
                     return MergeResult(
-                        status=MergeStatus.CONFLICT if gw_result.conflicts else MergeStatus.ERROR,
+                        status=(
+                            MergeStatus.CONFLICT
+                            if gw_result.conflicts
+                            else MergeStatus.ERROR
+                        ),
                         solution=solution,
                         message=gw_result.message,
                     )

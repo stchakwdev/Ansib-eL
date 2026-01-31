@@ -280,7 +280,9 @@ class TestTrustLineageIntegration:
 
         score_after_reject = manager.trust.get_trust_score(agent_id)
         assert score_after_reject.sample_count == 6
-        assert score_after_reject.score < high_score, "Score should decrease after a rejection"
+        assert (
+            score_after_reject.score < high_score
+        ), "Score should decrease after a rejection"
 
     def test_trust_tier_reflects_score(self, tmp_path: Path) -> None:
         """Trust tier should match the score range after decisions."""
@@ -308,9 +310,11 @@ class TestTrustLineageIntegration:
         tier = manager.trust.get_trust_tier(agent_id)
 
         # The tier should be at least MEDIUM given many accepted decisions
-        assert tier in (TrustTier.MEDIUM, TrustTier.HIGH, TrustTier.VERIFIED), (
-            f"Expected at least MEDIUM tier after 15 accepts, got {tier} with score {score.score}"
-        )
+        assert tier in (
+            TrustTier.MEDIUM,
+            TrustTier.HIGH,
+            TrustTier.VERIFIED,
+        ), f"Expected at least MEDIUM tier after 15 accepts, got {tier} with score {score.score}"
 
     def test_agent_history_retrieval(self, tmp_path: Path) -> None:
         """Agent decision history should be retrievable in reverse chronological order."""

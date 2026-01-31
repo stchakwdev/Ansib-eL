@@ -156,7 +156,9 @@ class GitWrapper:
         else:
             logger.info("GitPython not available, using subprocess")
 
-    def _run_git_command(self, args: list[str], check: bool = True) -> subprocess.CompletedProcess:
+    def _run_git_command(
+        self, args: list[str], check: bool = True
+    ) -> subprocess.CompletedProcess:
         """
         Run a git command via subprocess.
 
@@ -290,7 +292,9 @@ class GitWrapper:
             GitWrapperError: If branch creation fails
         """
         if not self.is_initialized():
-            raise GitWrapperError("Repository not initialized. Run 'ai-git init' first.")
+            raise GitWrapperError(
+                "Repository not initialized. Run 'ai-git init' first."
+            )
 
         # Validate agent_id before using in branch name
         self._validate_git_ref(agent_id)
@@ -316,7 +320,9 @@ class GitWrapper:
             }
 
             branch_file = (
-                self.ai_git_dir / self.AGENTS_DIR / f"{branch_name.replace('/', '_')}.json"
+                self.ai_git_dir
+                / self.AGENTS_DIR
+                / f"{branch_name.replace('/', '_')}.json"
             )
             with open(branch_file, "w") as f:
                 json.dump(branch_metadata, f, indent=2)
@@ -345,7 +351,9 @@ class GitWrapper:
             GitWrapperError: If commit fails
         """
         if not self.is_initialized():
-            raise GitWrapperError("Repository not initialized. Run 'ai-git init' first.")
+            raise GitWrapperError(
+                "Repository not initialized. Run 'ai-git init' first."
+            )
 
         try:
             # Stage files if specified
@@ -356,7 +364,9 @@ class GitWrapper:
                     self._run_git_command(["add"] + files)
 
             # Create commit with metadata in message trailer
-            metadata_trailer = f"\n\n[ai-git-metadata]\n{json.dumps(metadata.to_dict())}"
+            metadata_trailer = (
+                f"\n\n[ai-git-metadata]\n{json.dumps(metadata.to_dict())}"
+            )
             full_message = message + metadata_trailer
 
             if GITPYTHON_AVAILABLE and self.repo:
@@ -393,7 +403,9 @@ class GitWrapper:
             GitWrapperError: If commit fails
         """
         if not self.is_initialized():
-            raise GitWrapperError("Repository not initialized. Run 'ai-git init' first.")
+            raise GitWrapperError(
+                "Repository not initialized. Run 'ai-git init' first."
+            )
 
         try:
             if files:
@@ -437,12 +449,16 @@ class GitWrapper:
                 commit = self.repo.commit(commit_hash)
                 message = str(commit.message)
             else:
-                result = self._run_git_command(["log", "-1", "--format=%B", commit_hash])
+                result = self._run_git_command(
+                    ["log", "-1", "--format=%B", commit_hash]
+                )
                 message = str(result.stdout)
 
             # Look for metadata trailer
             if "[ai-git-metadata]" in message:
-                json_start = message.find("[ai-git-metadata]") + len("[ai-git-metadata]")
+                json_start = message.find("[ai-git-metadata]") + len(
+                    "[ai-git-metadata]"
+                )
                 json_str = message[json_start:].strip()
                 data = json.loads(json_str)
                 return AgentMetadata.from_dict(data)
@@ -453,7 +469,10 @@ class GitWrapper:
         return None
 
     def merge_agent_branch(
-        self, branch_name: str, strategy: str = "merge", target_branch: str | None = None
+        self,
+        branch_name: str,
+        strategy: str = "merge",
+        target_branch: str | None = None,
     ) -> MergeResult:
         """
         Merge an agent branch with conflict resolution.
@@ -467,7 +486,9 @@ class GitWrapper:
             MergeResult with success status and details
         """
         if not self.is_initialized():
-            raise GitWrapperError("Repository not initialized. Run 'ai-git init' first.")
+            raise GitWrapperError(
+                "Repository not initialized. Run 'ai-git init' first."
+            )
 
         original_branch = None
         conflicts = []
@@ -492,13 +513,17 @@ class GitWrapper:
                 if GITPYTHON_AVAILABLE and self.repo:
                     self.repo.git.merge(branch_name, no_ff=True)
                 else:
-                    self._run_git_command(["merge", "--no-ff", branch_name], check=False)
+                    self._run_git_command(
+                        ["merge", "--no-ff", branch_name], check=False
+                    )
 
             elif strategy == "squash":
                 if GITPYTHON_AVAILABLE and self.repo:
                     self.repo.git.merge(branch_name, squash=True)
                 else:
-                    self._run_git_command(["merge", "--squash", branch_name], check=False)
+                    self._run_git_command(
+                        ["merge", "--squash", branch_name], check=False
+                    )
 
             elif strategy == "rebase":
                 if GITPYTHON_AVAILABLE and self.repo:
@@ -538,7 +563,9 @@ class GitWrapper:
 
             # Update branch metadata
             branch_file = (
-                self.ai_git_dir / self.AGENTS_DIR / f"{branch_name.replace('/', '_')}.json"
+                self.ai_git_dir
+                / self.AGENTS_DIR
+                / f"{branch_name.replace('/', '_')}.json"
             )
             if branch_file.exists():
                 with open(branch_file) as f:
@@ -579,7 +606,9 @@ class GitWrapper:
                     if GITPYTHON_AVAILABLE and self.repo:
                         self.repo.heads[original_branch].checkout()
                     else:
-                        self._run_git_command(["checkout", original_branch], check=False)
+                        self._run_git_command(
+                            ["checkout", original_branch], check=False
+                        )
                 except (GitWrapperError, OSError, Exception):
                     pass
 
@@ -594,7 +623,9 @@ class GitWrapper:
             List of branch information dictionaries
         """
         if not self.is_initialized():
-            raise GitWrapperError("Repository not initialized. Run 'ai-git init' first.")
+            raise GitWrapperError(
+                "Repository not initialized. Run 'ai-git init' first."
+            )
 
         branches: list[dict[str, Any]] = []
         agents_dir = self.ai_git_dir / self.AGENTS_DIR
@@ -662,8 +693,12 @@ class GitWrapper:
                 status["branch"] = self.repo.active_branch.name
                 status["is_dirty"] = self.repo.is_dirty()
                 status["untracked_files"] = self.repo.untracked_files
-                status["modified_files"] = [item.a_path for item in self.repo.index.diff(None)]
-                status["staged_files"] = [item.a_path for item in self.repo.index.diff("HEAD")]
+                status["modified_files"] = [
+                    item.a_path for item in self.repo.index.diff(None)
+                ]
+                status["staged_files"] = [
+                    item.a_path for item in self.repo.index.diff("HEAD")
+                ]
             else:
                 # Get branch
                 result = self._run_git_command(["branch", "--show-current"])
@@ -671,14 +706,22 @@ class GitWrapper:
 
                 # Check for changes
                 result = self._run_git_command(["status", "--porcelain"])
-                lines = result.stdout.strip().split("\n") if result.stdout.strip() else []
+                lines = (
+                    result.stdout.strip().split("\n") if result.stdout.strip() else []
+                )
 
-                status["untracked_files"] = [line[3:] for line in lines if line.startswith("??")]
+                status["untracked_files"] = [
+                    line[3:] for line in lines if line.startswith("??")
+                ]
                 status["modified_files"] = [
-                    line[3:] for line in lines if line.startswith(" M") or line.startswith("M ")
+                    line[3:]
+                    for line in lines
+                    if line.startswith(" M") or line.startswith("M ")
                 ]
                 status["staged_files"] = [
-                    line[3:] for line in lines if line.startswith("A ") or line.startswith("M ")
+                    line[3:]
+                    for line in lines
+                    if line.startswith("A ") or line.startswith("M ")
                 ]
                 status["is_dirty"] = len(lines) > 0
 
@@ -723,7 +766,9 @@ class GitWrapper:
             else:
                 # Use git log with format
                 format_str = "%H|%an|%ad|%s"
-                result = self._run_git_command(["log", f"-{limit}", f"--format={format_str}"])
+                result = self._run_git_command(
+                    ["log", f"-{limit}", f"--format={format_str}"]
+                )
 
                 for line in result.stdout.strip().split("\n"):
                     if "|" in line:
@@ -739,7 +784,9 @@ class GitWrapper:
                                     "author": parts[1],
                                     "date": parts[2],
                                     "message": parts[3],
-                                    "metadata": metadata.to_dict() if metadata else None,
+                                    "metadata": (
+                                        metadata.to_dict() if metadata else None
+                                    ),
                                 }
                             )
 

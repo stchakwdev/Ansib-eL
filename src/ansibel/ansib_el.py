@@ -242,7 +242,9 @@ class AnsibElSystem:
         return {
             "success": result.success,
             "message": result.message,
-            "commit_hash": result.merged_commit if hasattr(result, "merged_commit") else None,
+            "commit_hash": (
+                result.merged_commit if hasattr(result, "merged_commit") else None
+            ),
         }
 
     def get_status(self) -> SystemStatus:
@@ -274,7 +276,9 @@ class AnsibElSystem:
             repo_initialized=self._initialized,
             active_agents=len(self.agents.list_active_agents()),
             pending_approvals=len(self.orchestrator.get_pending_approvals()),
-            total_commits=len(list(self.git.repo.iter_commits())) if self.git.repo else 0,
+            total_commits=(
+                len(list(self.git.repo.iter_commits())) if self.git.repo else 0
+            ),
             trust_scores=trust_scores,
             recent_tournaments=[],  # Would be populated from tournament history
         )
@@ -373,7 +377,9 @@ class AnsibElSystem:
         result = asyncio.run(self.tournament.run_tournament(tournament.tournament_id))
 
         # Present for human review
-        presentation = asyncio.run(self.tournament.present_for_review(tournament.tournament_id))
+        presentation = asyncio.run(
+            self.tournament.present_for_review(tournament.tournament_id)
+        )
 
         return {
             "mode": "tournament",
@@ -408,9 +414,11 @@ class AnsibElSystem:
             "task_id": str(task.id),
             "status": "delegated" if result.success else "failed",
             "message": result.message,
-            "pending_approval": result.requires_approval
-            if hasattr(result, "requires_approval")
-            else True,
+            "pending_approval": (
+                result.requires_approval
+                if hasattr(result, "requires_approval")
+                else True
+            ),
         }
 
     def _create_human_interface(self):
@@ -484,7 +492,9 @@ class AnsibElSystem:
             ) -> list[OrchestratorSolution]:
                 return []
 
-            def select_winner(self, solutions: list[OrchestratorSolution]) -> OrchestratorSolution:
+            def select_winner(
+                self, solutions: list[OrchestratorSolution]
+            ) -> OrchestratorSolution:
                 if not solutions:
                     raise ValueError("No solutions to select from")
                 return solutions[0]
@@ -498,7 +508,9 @@ class AnsibElSystem:
                 ]
 
                 tournament = self.tournament.create_tournament(
-                    task=task, agent_configs=configs, selection_mode=SelectionMode.HUMAN_CHOICE
+                    task=task,
+                    agent_configs=configs,
+                    selection_mode=SelectionMode.HUMAN_CHOICE,
                 )
 
                 return self.tournament.run_tournament(tournament.tournament_id)

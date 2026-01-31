@@ -91,7 +91,9 @@ class TrustScore:
         if not 0.0 <= self.score <= 1.0:
             raise ValueError(f"Score must be between 0 and 1, got {self.score}")
         if not 0.0 <= self.confidence <= 1.0:
-            raise ValueError(f"Confidence must be between 0 and 1, got {self.confidence}")
+            raise ValueError(
+                f"Confidence must be between 0 and 1, got {self.confidence}"
+            )
 
 
 @dataclass(frozen=True)
@@ -456,7 +458,9 @@ class TrustScorer:
         # Longer review time indicates more scrutiny
         time_factor = min(review_time_ms / 10000, 2.0)  # Cap at 2x
 
-        return 1.0 + (size_factor * 0.3) + (complexity_factor * 0.2) + (time_factor * 0.1)
+        return (
+            1.0 + (size_factor * 0.3) + (complexity_factor * 0.2) + (time_factor * 0.1)
+        )
 
     def _calculate_confidence(self, sample_count: int) -> float:
         """Calculate confidence based on sample size.
@@ -568,7 +572,10 @@ class TrustScorer:
             # Update EMA with new decision
             # Weight the new decision by its calculated weight
             weighted_decision = decision_value * min(weight, 2.0)
-            new_score = self.EMA_ALPHA * weighted_decision + (1 - self.EMA_ALPHA) * current_score
+            new_score = (
+                self.EMA_ALPHA * weighted_decision
+                + (1 - self.EMA_ALPHA) * current_score
+            )
 
             # Clamp score to valid range [0, 1]
             new_score = max(0.0, min(1.0, new_score))
@@ -578,7 +585,9 @@ class TrustScorer:
             new_tier = self._get_tier(new_score)
 
             # Update moving average review time
-            new_avg_time = ((avg_time * sample_count) + review_time_ms) / new_sample_count
+            new_avg_time = (
+                (avg_time * sample_count) + review_time_ms
+            ) / new_sample_count
 
             cursor.execute(
                 """UPDATE agent_profiles
@@ -698,7 +707,10 @@ class TrustScorer:
             )
 
             # Update decision counts
-            if decision == DecisionType.ACCEPTED or decision == DecisionType.AUTO_APPROVED:
+            if (
+                decision == DecisionType.ACCEPTED
+                or decision == DecisionType.AUTO_APPROVED
+            ):
                 conn.execute(
                     "UPDATE agent_profiles SET accepted_count = accepted_count + 1 WHERE agent_id = ?",
                     (str(agent_id),),
@@ -809,7 +821,9 @@ class TrustScorer:
         limit = self.AUTO_APPROVE_LIMITS.get(tier, 0)
         return change_size <= limit
 
-    def get_agent_history(self, agent_id: UUID, limit: int = 100) -> list[DecisionRecord]:
+    def get_agent_history(
+        self, agent_id: UUID, limit: int = 100
+    ) -> list[DecisionRecord]:
         """Get decision history for an agent.
 
         Args:
@@ -859,7 +873,9 @@ class TrustScorer:
         """
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("""SELECT * FROM agent_profiles WHERE agent_id = ?""", (str(agent_id),))
+            cursor.execute(
+                """SELECT * FROM agent_profiles WHERE agent_id = ?""", (str(agent_id),)
+            )
             row = cursor.fetchone()
 
             if not row:
@@ -881,9 +897,11 @@ class TrustScorer:
                 rejected_count=row["rejected_count"],
                 modified_count=row["modified_count"],
                 avg_review_time_ms=row["avg_review_time_ms"] or 0.0,
-                last_activity=datetime.fromisoformat(row["last_activity"])
-                if row["last_activity"]
-                else datetime.now(timezone.utc),
+                last_activity=(
+                    datetime.fromisoformat(row["last_activity"])
+                    if row["last_activity"]
+                    else datetime.now(timezone.utc)
+                ),
             )
 
     def get_all_agents(self) -> list[AgentProfile]:
@@ -895,7 +913,10 @@ class TrustScorer:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT agent_id FROM agent_profiles")
-            profiles = [self.get_agent_profile(UUID(row["agent_id"])) for row in cursor.fetchall()]
+            profiles = [
+                self.get_agent_profile(UUID(row["agent_id"]))
+                for row in cursor.fetchall()
+            ]
             return [p for p in profiles if p is not None]
 
     def apply_recovery(self, agent_id: UUID, boost_amount: float = 0.1) -> TrustScore:
@@ -915,7 +936,8 @@ class TrustScorer:
         with self._lock, self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT trust_score FROM agent_profiles WHERE agent_id = ?", (str(agent_id),)
+                "SELECT trust_score FROM agent_profiles WHERE agent_id = ?",
+                (str(agent_id),),
             )
             row = cursor.fetchone()
 
@@ -929,7 +951,12 @@ class TrustScorer:
                 """UPDATE agent_profiles
                        SET trust_score = ?, tier = ?, last_updated = ?
                        WHERE agent_id = ?""",
-                (new_score, new_tier.value, datetime.now(timezone.utc).isoformat(), str(agent_id)),
+                (
+                    new_score,
+                    new_tier.value,
+                    datetime.now(timezone.utc).isoformat(),
+                    str(agent_id),
+                ),
             )
             conn.commit()
 
@@ -1082,27 +1109,33 @@ class LineageTracker:
 
             # Get reasoning record
             cursor.execute(
-                """SELECT * FROM reasoning_records WHERE commit_hash = ?""", (commit_hash,)
+                """SELECT * FROM reasoning_records WHERE commit_hash = ?""",
+                (commit_hash,),
             )
             reasoning_row = cursor.fetchone()
 
             # Get decision record
             cursor.execute(
-                """SELECT * FROM decision_records WHERE commit_hash = ?""", (commit_hash,)
+                """SELECT * FROM decision_records WHERE commit_hash = ?""",
+                (commit_hash,),
             )
             decision_row = cursor.fetchone()
 
             # Get parent commits
             cursor.execute(
-                """SELECT parent_commit FROM lineage_chain WHERE commit_hash = ?""", (commit_hash,)
+                """SELECT parent_commit FROM lineage_chain WHERE commit_hash = ?""",
+                (commit_hash,),
             )
             parent_commits = [
-                row["parent_commit"] for row in cursor.fetchall() if row["parent_commit"]
+                row["parent_commit"]
+                for row in cursor.fetchall()
+                if row["parent_commit"]
             ]
 
             # Get child commits
             cursor.execute(
-                """SELECT commit_hash FROM lineage_chain WHERE parent_commit = ?""", (commit_hash,)
+                """SELECT commit_hash FROM lineage_chain WHERE parent_commit = ?""",
+                (commit_hash,),
             )
             child_commits = [row["commit_hash"] for row in cursor.fetchall()]
 
@@ -1113,7 +1146,8 @@ class LineageTracker:
                 (commit_hash,),
             )
             library_choices = {
-                row["library_name"]: row["reasoning_summary"] for row in cursor.fetchall()
+                row["library_name"]: row["reasoning_summary"]
+                for row in cursor.fetchall()
             }
 
             # Build decision record
@@ -1143,7 +1177,9 @@ class LineageTracker:
                     timestamp=datetime.fromisoformat(reasoning_row["timestamp"]),
                     reasoning=reasoning_row["reasoning"],
                     confidence=reasoning_row["confidence"],
-                    supporting_evidence=json.loads(reasoning_row["supporting_evidence"] or "[]"),
+                    supporting_evidence=json.loads(
+                        reasoning_row["supporting_evidence"] or "[]"
+                    ),
                 )
 
             # Build full chain trace
@@ -1167,7 +1203,11 @@ class LineageTracker:
             )
 
     def _trace_chain_recursive(
-        self, conn: sqlite3.Connection, commit_hash: str, max_depth: int, current_depth: int = 0
+        self,
+        conn: sqlite3.Connection,
+        commit_hash: str,
+        max_depth: int,
+        current_depth: int = 0,
     ) -> list[dict[str, Any]]:
         """Recursively trace the decision chain."""
         if current_depth >= max_depth:
@@ -1201,17 +1241,22 @@ class LineageTracker:
 
         # Get parents and recurse
         cursor.execute(
-            "SELECT parent_commit FROM lineage_chain WHERE commit_hash = ?", (commit_hash,)
+            "SELECT parent_commit FROM lineage_chain WHERE commit_hash = ?",
+            (commit_hash,),
         )
         parents = [r["parent_commit"] for r in cursor.fetchall() if r["parent_commit"]]
 
         result = [chain_entry]
         for parent in parents:
-            result.extend(self._trace_chain_recursive(conn, parent, max_depth, current_depth + 1))
+            result.extend(
+                self._trace_chain_recursive(conn, parent, max_depth, current_depth + 1)
+            )
 
         return result
 
-    def trace_decision_chain(self, start_commit: str, max_depth: int = 10) -> list[DecisionLineage]:
+    def trace_decision_chain(
+        self, start_commit: str, max_depth: int = 10
+    ) -> list[DecisionLineage]:
         """
         Trace the full decision chain starting from a commit.
 
@@ -1238,13 +1283,17 @@ class LineageTracker:
                 if lineage:
                     chain.append(lineage)
                     # Follow first parent
-                    current = lineage.parent_commits[0] if lineage.parent_commits else None
+                    current = (
+                        lineage.parent_commits[0] if lineage.parent_commits else None
+                    )
                 else:
                     break
 
         return chain
 
-    def get_reasoning_for_library_choice(self, commit_hash: str, library: str) -> str | None:
+    def get_reasoning_for_library_choice(
+        self, commit_hash: str, library: str
+    ) -> str | None:
         """
         Get reasoning for a specific library choice in a commit.
 
@@ -1309,7 +1358,9 @@ class LineageTracker:
                         timestamp=datetime.fromisoformat(row["timestamp"]),
                         reasoning=row["reasoning"],
                         confidence=row["confidence"],
-                        supporting_evidence=json.loads(row["supporting_evidence"] or "[]"),
+                        supporting_evidence=json.loads(
+                            row["supporting_evidence"] or "[]"
+                        ),
                     )
                 )
 
@@ -1349,7 +1400,9 @@ class TrustLineageManager:
         """Convenience delegate to TrustScorer.get_trust_tier."""
         return self.trust.get_trust_tier(agent_id)
 
-    def get_agent_history(self, agent_id: UUID, limit: int = 50) -> list[DecisionRecord]:
+    def get_agent_history(
+        self, agent_id: UUID, limit: int = 50
+    ) -> list[DecisionRecord]:
         """Convenience delegate to TrustScorer.get_agent_history."""
         return self.trust.get_agent_history(agent_id, limit)
 
@@ -1459,6 +1512,10 @@ class TrustLineageManager:
         return {
             "profile": profile.to_dict(),
             "recent_decisions": [d.to_dict() for d in recent_history],
-            "can_auto_approve_small_changes": self.trust.should_auto_approve(agent_id, 50),
-            "can_auto_approve_medium_changes": self.trust.should_auto_approve(agent_id, 150),
+            "can_auto_approve_small_changes": self.trust.should_auto_approve(
+                agent_id, 50
+            ),
+            "can_auto_approve_medium_changes": self.trust.should_auto_approve(
+                agent_id, 150
+            ),
         }

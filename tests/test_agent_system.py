@@ -184,8 +184,12 @@ class TestAgentRetrieval:
         assert result is None
 
     def test_list_agents_by_status(self, manager):
-        manager.spawn_agent(purpose="A", model_version="gpt-4", prompt="p", task_id="t1")
-        agent_b = manager.spawn_agent(purpose="B", model_version="gpt-4", prompt="p", task_id="t2")
+        manager.spawn_agent(
+            purpose="A", model_version="gpt-4", prompt="p", task_id="t1"
+        )
+        agent_b = manager.spawn_agent(
+            purpose="B", model_version="gpt-4", prompt="p", task_id="t2"
+        )
         manager.update_agent_status(agent_b.agent_id, AgentStatus.WORKING)
 
         idle_agents = manager.list_agents_by_status(AgentStatus.IDLE)
@@ -219,7 +223,9 @@ class TestStatusTransitions:
 
     def test_idle_to_working(self, manager, spawned_agent):
         assert spawned_agent.status == AgentStatus.IDLE
-        result = manager.update_agent_status(spawned_agent.agent_id, AgentStatus.WORKING)
+        result = manager.update_agent_status(
+            spawned_agent.agent_id, AgentStatus.WORKING
+        )
         assert result is True
         assert manager.get_agent(spawned_agent.agent_id).status == AgentStatus.WORKING
 
@@ -251,7 +257,9 @@ class TestTerminateAgent:
 
     def test_terminate_sets_status(self, manager, spawned_agent):
         manager.terminate_agent(spawned_agent.agent_id)
-        assert manager.get_agent(spawned_agent.agent_id).status == AgentStatus.TERMINATED
+        assert (
+            manager.get_agent(spawned_agent.agent_id).status == AgentStatus.TERMINATED
+        )
 
     def test_terminate_with_cleanup_removes_context(self, manager, spawned_agent):
         aid = spawned_agent.agent_id
@@ -745,7 +753,9 @@ class TestCleanupTerminated:
     """Tests for cleanup_terminated."""
 
     def test_cleanup_all_terminated(self, manager):
-        a = manager.spawn_agent(purpose="X", model_version="gpt-4", prompt="p", task_id="t")
+        a = manager.spawn_agent(
+            purpose="X", model_version="gpt-4", prompt="p", task_id="t"
+        )
         manager.terminate_agent(a.agent_id, cleanup=False)
         removed = manager.cleanup_terminated()
         assert removed == 1

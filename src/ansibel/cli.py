@@ -100,7 +100,9 @@ if CLICK_AVAILABLE:
         wrapper = get_wrapper()
 
         if wrapper.is_initialized() and not force:
-            print_warning("Repository already initialized. Use --force to reinitialize.")
+            print_warning(
+                "Repository already initialized. Use --force to reinitialize."
+            )
             return
 
         print_header("Initializing AI-Git Repository")
@@ -161,7 +163,9 @@ if CLICK_AVAILABLE:
         # Agent info
         active_agents = repo_status.get("active_agents", [])
         if active_agents:
-            print(colorize(f"Active Agent Branches ({len(active_agents)}):", Colors.CYAN))
+            print(
+                colorize(f"Active Agent Branches ({len(active_agents)}):", Colors.CYAN)
+            )
             for agent in active_agents:
                 print(f"  → {agent['name']}")
                 print(f"    Agent: {agent.get('agent_id', 'unknown')}")
@@ -175,7 +179,9 @@ if CLICK_AVAILABLE:
     # -------------------------------------------------------------------------
     @cli.command()
     @click.argument("agent_id")
-    @click.option("--purpose", "-p", default="Agent workspace", help="Purpose of the branch")
+    @click.option(
+        "--purpose", "-p", default="Agent workspace", help="Purpose of the branch"
+    )
     def branch(agent_id: str, purpose: str):
         """Create a new agent branch."""
         wrapper = get_wrapper()
@@ -204,7 +210,9 @@ if CLICK_AVAILABLE:
     @click.option("--model-version", "-m", default="unknown", help="Model version")
     @click.option("--prompt-hash", "-p", default="", help="Prompt hash")
     @click.option("--parent-task", "-t", default=None, help="Parent task ID")
-    @click.option("--confidence", "-c", type=float, default=None, help="Confidence score")
+    @click.option(
+        "--confidence", "-c", type=float, default=None, help="Confidence score"
+    )
     @click.option("--files", "-f", multiple=True, help="Specific files to commit")
     def commit(
         message: str,
@@ -259,7 +267,9 @@ if CLICK_AVAILABLE:
         default="merge",
         help="Merge strategy",
     )
-    @click.option("--target", "-t", default=None, help="Target branch (default: current)")
+    @click.option(
+        "--target", "-t", default=None, help="Target branch (default: current)"
+    )
     @click.option("--yes", "-y", is_flag=True, help="Skip confirmation")
     def merge(branch_name: str, strategy: str, target: str | None, yes: bool):
         """Merge an agent branch."""
@@ -318,7 +328,9 @@ if CLICK_AVAILABLE:
 
         if agent:
             commits = [
-                c for c in commits if c.get("metadata") and c["metadata"].get("agent_id") == agent
+                c
+                for c in commits
+                if c.get("metadata") and c["metadata"].get("agent_id") == agent
             ]
 
         if json_output:
@@ -388,7 +400,10 @@ if CLICK_AVAILABLE:
         for status_name, branches in by_status.items():
             status_color = Colors.GREEN if status_name == "active" else Colors.YELLOW
             print(
-                colorize(f"\n[{status_name.upper()}] ({len(branches)})", status_color + Colors.BOLD)
+                colorize(
+                    f"\n[{status_name.upper()}] ({len(branches)})",
+                    status_color + Colors.BOLD,
+                )
             )
 
             for branch in branches:
@@ -431,7 +446,9 @@ if CLICK_AVAILABLE:
 
         if branch:
             # Review specific branch
-            target_branch = next((b for b in active_branches if b["name"] == branch), None)
+            target_branch = next(
+                (b for b in active_branches if b["name"] == branch), None
+            )
             if not target_branch:
                 print_error(f"Branch '{branch}' not found or not active")
                 sys.exit(1)
@@ -444,7 +461,8 @@ if CLICK_AVAILABLE:
 
             print(
                 colorize(
-                    f"\n[{idx}/{len(branches_to_review)}] Reviewing: {branch_name}", Colors.BOLD
+                    f"\n[{idx}/{len(branches_to_review)}] Reviewing: {branch_name}",
+                    Colors.BOLD,
                 )
             )
             print(f"Agent: {branch_info.get('agent_id', 'unknown')}")
@@ -494,7 +512,9 @@ if CLICK_AVAILABLE:
             elif action == "details":
                 # Show commit history for this branch
                 commits = wrapper.get_ai_enhanced_history(limit=10)
-                branch_commits = [c for c in commits if branch_name in c.get("branches", [])]
+                branch_commits = [
+                    c for c in commits if branch_name in c.get("branches", [])
+                ]
                 for c in branch_commits:
                     print(f"  {c['hash']} - {c['message']}")
 
@@ -519,7 +539,9 @@ if CLICK_AVAILABLE:
         new_score = wrapper.update_agent_trust_score(agent_id, score_delta)
 
         score_color = (
-            Colors.GREEN if new_score > 0.7 else (Colors.YELLOW if new_score > 0.4 else Colors.RED)
+            Colors.GREEN
+            if new_score > 0.7
+            else (Colors.YELLOW if new_score > 0.4 else Colors.RED)
         )
         print_success(
             f"Updated trust score for {agent_id}: {colorize(f'{new_score:.2f}', score_color)}"
@@ -581,7 +603,8 @@ if CLICK_AVAILABLE:
 def create_argparse_cli():
     """Create CLI using argparse as fallback."""
     parser = argparse.ArgumentParser(
-        prog="ai-git", description="AI-Native Version Control System - Extending Git for AI Agents"
+        prog="ai-git",
+        description="AI-Native Version Control System - Extending Git for AI Agents",
     )
     parser.add_argument("--version", action="version", version="ai-git 1.0.0")
 
@@ -589,11 +612,15 @@ def create_argparse_cli():
 
     # Init command
     init_parser = subparsers.add_parser("init", help="Initialize an ai-git repository")
-    init_parser.add_argument("--force", "-f", action="store_true", help="Force reinitialization")
+    init_parser.add_argument(
+        "--force", "-f", action="store_true", help="Force reinitialization"
+    )
 
     # Status command
     status_parser = subparsers.add_parser("status", help="Show repository status")
-    status_parser.add_argument("--json-output", "-j", action="store_true", help="Output as JSON")
+    status_parser.add_argument(
+        "--json-output", "-j", action="store_true", help="Output as JSON"
+    )
 
     # Branch command
     branch_parser = subparsers.add_parser("branch", help="Create a new agent branch")
@@ -603,16 +630,26 @@ def create_argparse_cli():
     )
 
     # Commit command
-    commit_parser = subparsers.add_parser("commit", help="Create a commit with AI metadata")
+    commit_parser = subparsers.add_parser(
+        "commit", help="Create a commit with AI metadata"
+    )
     commit_parser.add_argument("message", help="Commit message")
-    commit_parser.add_argument("--agent-id", "-a", required=True, help="Agent identifier")
-    commit_parser.add_argument("--model-version", "-m", default="unknown", help="Model version")
+    commit_parser.add_argument(
+        "--agent-id", "-a", required=True, help="Agent identifier"
+    )
+    commit_parser.add_argument(
+        "--model-version", "-m", default="unknown", help="Model version"
+    )
     commit_parser.add_argument("--prompt-hash", "-p", default="", help="Prompt hash")
-    commit_parser.add_argument("--parent-task", "-t", default=None, help="Parent task ID")
+    commit_parser.add_argument(
+        "--parent-task", "-t", default=None, help="Parent task ID"
+    )
     commit_parser.add_argument(
         "--confidence", "-c", type=float, default=None, help="Confidence score"
     )
-    commit_parser.add_argument("--files", "-f", nargs="+", help="Specific files to commit")
+    commit_parser.add_argument(
+        "--files", "-f", nargs="+", help="Specific files to commit"
+    )
 
     # Merge command
     merge_parser = subparsers.add_parser("merge", help="Merge an agent branch")
@@ -625,13 +662,23 @@ def create_argparse_cli():
         help="Merge strategy",
     )
     merge_parser.add_argument("--target", "-t", default=None, help="Target branch")
-    merge_parser.add_argument("--yes", "-y", action="store_true", help="Skip confirmation")
+    merge_parser.add_argument(
+        "--yes", "-y", action="store_true", help="Skip confirmation"
+    )
 
     # History command
-    history_parser = subparsers.add_parser("history", help="Show AI-enhanced commit history")
-    history_parser.add_argument("--limit", "-n", type=int, default=20, help="Number of commits")
-    history_parser.add_argument("--agent", "-a", default=None, help="Filter by agent ID")
-    history_parser.add_argument("--json-output", "-j", action="store_true", help="Output as JSON")
+    history_parser = subparsers.add_parser(
+        "history", help="Show AI-enhanced commit history"
+    )
+    history_parser.add_argument(
+        "--limit", "-n", type=int, default=20, help="Number of commits"
+    )
+    history_parser.add_argument(
+        "--agent", "-a", default=None, help="Filter by agent ID"
+    )
+    history_parser.add_argument(
+        "--json-output", "-j", action="store_true", help="Output as JSON"
+    )
 
     # Agents command
     agents_parser = subparsers.add_parser("agents", help="List active agents")
@@ -642,21 +689,29 @@ def create_argparse_cli():
         default="all",
         help="Filter by status",
     )
-    agents_parser.add_argument("--json-output", "-j", action="store_true", help="Output as JSON")
+    agents_parser.add_argument(
+        "--json-output", "-j", action="store_true", help="Output as JSON"
+    )
 
     # Review command
     review_parser = subparsers.add_parser("review", help="Enter review mode")
-    review_parser.add_argument("--branch", "-b", default=None, help="Specific branch to review")
+    review_parser.add_argument(
+        "--branch", "-b", default=None, help="Specific branch to review"
+    )
 
     # Trust command
-    trust_parser = subparsers.add_parser("trust", help="Update trust score for an agent")
+    trust_parser = subparsers.add_parser(
+        "trust", help="Update trust score for an agent"
+    )
     trust_parser.add_argument("agent_id", help="Agent identifier")
     trust_parser.add_argument("score_delta", type=float, help="Trust score change")
 
     # Diff command
     diff_parser = subparsers.add_parser("diff", help="Show diff between branches")
     diff_parser.add_argument("branch_a", help="First branch")
-    diff_parser.add_argument("branch_b", nargs="?", help="Second branch (default: current)")
+    diff_parser.add_argument(
+        "branch_b", nargs="?", help="Second branch (default: current)"
+    )
 
     # Metadata command
     meta_parser = subparsers.add_parser("metadata", help="Show commit metadata")
@@ -732,7 +787,9 @@ def run_argparse_cli():
         )
 
         try:
-            commit_hash = wrapper.commit_with_metadata(args.message, metadata, args.files)
+            commit_hash = wrapper.commit_with_metadata(
+                args.message, metadata, args.files
+            )
             print(f"Created commit: {commit_hash[:8]}")
         except GitWrapperError as e:
             print(f"Error: {e}")
@@ -750,7 +807,9 @@ def run_argparse_cli():
                 print("Merge cancelled")
                 return
 
-        result = wrapper.merge_agent_branch(args.branch_name, args.strategy, args.target)
+        result = wrapper.merge_agent_branch(
+            args.branch_name, args.strategy, args.target
+        )
 
         if result.success:
             print(f"Success: {result.message}")
@@ -794,7 +853,9 @@ def run_argparse_cli():
             print(json.dumps(branches, indent=2))
         else:
             for branch in branches:
-                print(f"{branch['name']} - {branch.get('status')} - {branch.get('agent_id')}")
+                print(
+                    f"{branch['name']} - {branch.get('status')} - {branch.get('agent_id')}"
+                )
 
     # Review command
     elif args.command == "review":

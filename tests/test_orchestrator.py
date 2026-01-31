@@ -41,7 +41,9 @@ from ansibel.orchestrator import (
 class FakeGitWrapper:
     """Fake GitWrapper that satisfies GitWrapperInterface."""
 
-    def __init__(self, branch: str = "main", last_commit: str = "abc123", clean: bool = True):
+    def __init__(
+        self, branch: str = "main", last_commit: str = "abc123", clean: bool = True
+    ):
         self._branch = branch
         self._last_commit = last_commit
         self._clean = clean
@@ -60,7 +62,9 @@ class FakeGitWrapper:
     def commit_changes(self, message: str, files: list[str] | None = None) -> str:
         return "deadbeef"
 
-    def merge_branch(self, branch_name: str, strategy: str = "recursive") -> MergeResult:
+    def merge_branch(
+        self, branch_name: str, strategy: str = "recursive"
+    ) -> MergeResult:
         return MergeResult(
             status=MergeStatus.MERGED,
             solution=MagicMock(),
@@ -76,7 +80,9 @@ class FakeGitWrapper:
     def get_branch_protection(self, branch_name: str) -> BranchProtectionLevel:
         return self._protections.get(branch_name, BranchProtectionLevel.NONE)
 
-    def set_branch_protection(self, branch_name: str, level: BranchProtectionLevel) -> bool:
+    def set_branch_protection(
+        self, branch_name: str, level: BranchProtectionLevel
+    ) -> bool:
         self._protections[branch_name] = level
         return True
 
@@ -117,7 +123,9 @@ class FakeAgent:
         return TaskStatus.IDLE
 
 
-def _make_solution(task_id: TaskId | None = None, agent_id: AgentId | None = None) -> Solution:
+def _make_solution(
+    task_id: TaskId | None = None, agent_id: AgentId | None = None
+) -> Solution:
     """Helper to create a Solution for tests."""
     return Solution(
         task_id=task_id or TaskId(),
@@ -248,7 +256,8 @@ class TestTaskExecutionOrder:
     def test_independent_tasks_all_returned(self) -> None:
         """Tasks with no dependencies should all appear in the result."""
         tasks = [
-            Task(description=f"Task {i}", requirements=[], acceptance_criteria=[]) for i in range(4)
+            Task(description=f"Task {i}", requirements=[], acceptance_criteria=[])
+            for i in range(4)
         ]
         breakdown = TaskBreakdown(original_prompt="test", tasks=tasks)
 
@@ -353,7 +362,9 @@ class TestApprovalQueue:
         solution = _make_solution()
         approval_id = orch.submit_for_approval(solution)
 
-        result = orch.approve_solution(approval_id, reviewer="alice", comments="Looks good")
+        result = orch.approve_solution(
+            approval_id, reviewer="alice", comments="Looks good"
+        )
 
         assert isinstance(result, ApprovalResult)
         assert result.success is True
@@ -369,7 +380,9 @@ class TestApprovalQueue:
         solution = _make_solution()
         approval_id = orch.submit_for_approval(solution)
 
-        result = orch.reject_solution(approval_id, reviewer="bob", comments="Needs work")
+        result = orch.reject_solution(
+            approval_id, reviewer="bob", comments="Needs work"
+        )
 
         assert isinstance(result, ApprovalResult)
         assert result.success is True
@@ -432,7 +445,10 @@ class TestBranchProtection:
 
         orch.set_branch_protection("develop", BranchProtectionLevel.REVIEW_REQUIRED)
 
-        assert orch.get_branch_protection("develop") == BranchProtectionLevel.REVIEW_REQUIRED
+        assert (
+            orch.get_branch_protection("develop")
+            == BranchProtectionLevel.REVIEW_REQUIRED
+        )
 
     def test_lock_branch(self, tmp_path: Path) -> None:
         """Locking a branch should set LOCKED protection level."""

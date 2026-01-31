@@ -163,9 +163,12 @@ class TestFullGitWorkflow:
         our_commits = [
             h
             for h in history
-            if h.get("metadata") is not None and h["metadata"].get("agent_id") == agent_id
+            if h.get("metadata") is not None
+            and h["metadata"].get("agent_id") == agent_id
         ]
-        assert len(our_commits) >= 1, "The commit with agent metadata should appear in history"
+        assert (
+            len(our_commits) >= 1
+        ), "The commit with agent metadata should appear in history"
 
 
 # ---------------------------------------------------------------------------
@@ -250,9 +253,9 @@ class TestConflictDetection:
         # Now try merging branch B -- should detect conflict
         merge_b = gw.merge_agent_branch(branch_b, target_branch=main_branch)
         # The merge should either fail or report conflicts
-        assert merge_b.success is False or len(merge_b.conflicts) > 0, (
-            "Merging conflicting branches should detect conflicts"
-        )
+        assert (
+            merge_b.success is False or len(merge_b.conflicts) > 0
+        ), "Merging conflicting branches should detect conflicts"
 
 
 # ---------------------------------------------------------------------------
@@ -311,17 +314,17 @@ class TestMultipleAgentBranches:
             )
 
             expected_file = repo_dir / f"{agent_ids[i]}_work.py"
-            assert expected_file.exists(), (
-                f"{expected_file.name} should exist on branch {branch_name}"
-            )
+            assert (
+                expected_file.exists()
+            ), f"{expected_file.name} should exist on branch {branch_name}"
 
             # Other agents' files should NOT exist on this branch
             for j, other_agent_id in enumerate(agent_ids):
                 if i != j:
                     other_file = repo_dir / f"{other_agent_id}_work.py"
-                    assert not other_file.exists(), (
-                        f"{other_file.name} should NOT exist on branch {branch_name}"
-                    )
+                    assert (
+                        not other_file.exists()
+                    ), f"{other_file.name} should NOT exist on branch {branch_name}"
 
     def test_multiple_branches_all_merge_cleanly(self, tmp_path: Path) -> None:
         """Non-overlapping changes on multiple branches should merge cleanly."""
@@ -344,7 +347,9 @@ class TestMultipleAgentBranches:
                 check=True,
             )
             agent_id = f"agent-merge-{idx}"
-            branch_name = gw.create_agent_branch(agent_id, f"non-overlapping task {idx}")
+            branch_name = gw.create_agent_branch(
+                agent_id, f"non-overlapping task {idx}"
+            )
             branches.append(branch_name)
 
             filename = f"module_{idx}.py"
@@ -365,9 +370,9 @@ class TestMultipleAgentBranches:
         )
         for branch_name in branches:
             result = gw.merge_agent_branch(branch_name, target_branch=main_branch)
-            assert result.success is True, (
-                f"Merging {branch_name} should succeed (non-overlapping changes)"
-            )
+            assert (
+                result.success is True
+            ), f"Merging {branch_name} should succeed (non-overlapping changes)"
             assert len(result.conflicts) == 0
 
         # All files should exist on main after merges
@@ -433,18 +438,18 @@ class TestBranchListingAndCleanup:
         branch_name = gw.create_agent_branch(agent_id, "naming convention test")
 
         # Branch should start with "agent/"
-        assert branch_name.startswith("agent/"), (
-            f"Branch name '{branch_name}' should start with 'agent/'"
-        )
+        assert branch_name.startswith(
+            "agent/"
+        ), f"Branch name '{branch_name}' should start with 'agent/'"
         # Branch should contain the agent_id
-        assert agent_id in branch_name, (
-            f"Branch name '{branch_name}' should contain agent_id '{agent_id}'"
-        )
+        assert (
+            agent_id in branch_name
+        ), f"Branch name '{branch_name}' should contain agent_id '{agent_id}'"
         # Branch name should have 3 segments separated by "/"
         parts = branch_name.split("/")
-        assert len(parts) == 3, (
-            f"Branch name '{branch_name}' should have format agent/{{id}}/{{timestamp}}"
-        )
+        assert (
+            len(parts) == 3
+        ), f"Branch name '{branch_name}' should have format agent/{{id}}/{{timestamp}}"
         assert parts[0] == "agent"
 
     def test_list_branches_filter_by_status(self, tmp_path: Path) -> None:
@@ -514,7 +519,9 @@ class TestMetadataPersistence:
         assert retrieved.prompt_hash == original_metadata.prompt_hash
         assert retrieved.timestamp == original_metadata.timestamp
         assert retrieved.parent_task == original_metadata.parent_task
-        assert retrieved.confidence_score == pytest.approx(original_metadata.confidence_score)
+        assert retrieved.confidence_score == pytest.approx(
+            original_metadata.confidence_score
+        )
         assert retrieved.reasoning == original_metadata.reasoning
         assert retrieved.tool_calls == original_metadata.tool_calls
 
@@ -590,7 +597,9 @@ class TestMetadataPersistence:
         # Verify each commit has its own distinct metadata
         for commit_hash, expected_agent_id, expected_model in commits:
             retrieved = gw.get_commit_metadata(commit_hash)
-            assert retrieved is not None, f"Metadata for commit {commit_hash[:8]} should exist"
+            assert (
+                retrieved is not None
+            ), f"Metadata for commit {commit_hash[:8]} should exist"
             assert retrieved.agent_id == expected_agent_id
             assert retrieved.model_version == expected_model
 

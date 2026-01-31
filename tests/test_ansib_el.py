@@ -36,7 +36,9 @@ GIT_ENV = {
 def _init_git_repo(path: Path) -> None:
     """Create a bare git repository with an initial commit."""
     env = {**os.environ, **GIT_ENV}
-    subprocess.run(["git", "init"], cwd=str(path), capture_output=True, check=True, env=env)
+    subprocess.run(
+        ["git", "init"], cwd=str(path), capture_output=True, check=True, env=env
+    )
     subprocess.run(
         ["git", "config", "user.email", "test@ansibel.dev"],
         cwd=str(path),
@@ -53,7 +55,9 @@ def _init_git_repo(path: Path) -> None:
     )
     readme = path / "README.md"
     readme.write_text("# Test Repo\n")
-    subprocess.run(["git", "add", "."], cwd=str(path), capture_output=True, check=True, env=env)
+    subprocess.run(
+        ["git", "add", "."], cwd=str(path), capture_output=True, check=True, env=env
+    )
     subprocess.run(
         ["git", "commit", "-m", "Initial commit"],
         cwd=str(path),
@@ -189,7 +193,9 @@ class TestPendingApprovals:
 
 
 class TestGetAgentInfo:
-    def test_invalid_agent_returns_error(self, initialized_system: AnsibElSystem) -> None:
+    def test_invalid_agent_returns_error(
+        self, initialized_system: AnsibElSystem
+    ) -> None:
         fake_id = str(uuid4())
         info = initialized_system.get_agent_info(fake_id)
         assert isinstance(info, dict)
@@ -431,7 +437,9 @@ class TestApprovalNotFound:
 
 
 class TestStatusAfterProcessing:
-    def test_status_reflects_pending_approvals(self, initialized_system: AnsibElSystem) -> None:
+    def test_status_reflects_pending_approvals(
+        self, initialized_system: AnsibElSystem
+    ) -> None:
         """After submitting a solution, pending_approvals should increase."""
         task = Task(
             description="Test pending count",
