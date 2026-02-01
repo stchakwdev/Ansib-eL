@@ -84,21 +84,21 @@ class TestGitWrapper:
         # Create commit with metadata
         metadata = AgentMetadata(
             agent_id="test-agent",
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt_hash="abc123",
             timestamp=datetime.now(timezone.utc).isoformat(),
             confidence_score=0.95
         )
-        
+
         commit_hash = self.wrapper.commit_with_metadata("Test commit", metadata)
-        
+
         assert len(commit_hash) == 40  # Full SHA-1 hash
-        
+
         # Verify metadata was saved
         retrieved = self.wrapper.get_commit_metadata(commit_hash)
         assert retrieved is not None
         assert retrieved.agent_id == "test-agent"
-        assert retrieved.model_version == "gpt-4"
+        assert retrieved.model_version == "gpt-5.2"
         assert retrieved.confidence_score == 0.95
     
     def test_list_agent_branches(self):
@@ -156,21 +156,21 @@ class TestAgentMetadata:
         """Test conversion to dictionary."""
         metadata = AgentMetadata(
             agent_id="test",
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt_hash="abc",
             timestamp="2024-01-01T00:00:00Z"
         )
-        
+
         d = metadata.to_dict()
-        
+
         assert d['agent_id'] == 'test'
-        assert d['model_version'] == 'gpt-4'
+        assert d['model_version'] == 'gpt-5.2'
     
     def test_from_dict(self):
         """Test creation from dictionary."""
         data = {
             'agent_id': 'test',
-            'model_version': 'gpt-4',
+            'model_version': 'gpt-5.2',
             'prompt_hash': 'abc',
             'timestamp': '2024-01-01T00:00:00Z',
             'confidence_score': 0.9

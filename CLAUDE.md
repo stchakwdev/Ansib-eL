@@ -72,7 +72,7 @@ Human prompt -> Orchestrator (task breakdown) -> AgentManager (spawn N agents on
 
 | Variable | Purpose | Default |
 |----------|---------|---------|
-| `ANSIBEL_DEFAULT_MODEL` | Default model for agents | `gpt-4` |
+| `ANSIBEL_DEFAULT_MODEL` | Default model for agents | `gpt-5.2` |
 | `ANSIBEL_TOURNAMENT_AGENTS` | Agents per tournament | `3` |
 | `ANSIBEL_TOURNAMENT_TIMEOUT` | Tournament timeout (seconds) | `300` |
 | `ANSIBEL_TRUST_THRESHOLD_HIGH` | High trust threshold | `0.8` |

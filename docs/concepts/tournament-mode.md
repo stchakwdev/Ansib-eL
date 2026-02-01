@@ -156,9 +156,9 @@ task = Task(
 
 # Configure agents
 configs = [
-    AgentConfig(agent_id="a1", agent_type="gpt-4", model_config={}, system_prompt="..."),
-    AgentConfig(agent_id="a2", agent_type="claude-3", model_config={}, system_prompt="..."),
-    AgentConfig(agent_id="a3", agent_type="gpt-4", model_config={}, system_prompt="..."),
+    AgentConfig(agent_id="a1", agent_type="gpt-5.2", model_config={}, system_prompt="..."),
+    AgentConfig(agent_id="a2", agent_type="claude-opus-4.5", model_config={}, system_prompt="..."),
+    AgentConfig(agent_id="a3", agent_type="gpt-5.2", model_config={}, system_prompt="..."),
 ]
 
 # Create and run

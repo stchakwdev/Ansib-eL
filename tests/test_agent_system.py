@@ -58,7 +58,7 @@ def spawned_agent(manager):
     """Spawn and return a single agent from the manager."""
     return manager.spawn_agent(
         purpose="Write unit tests",
-        model_version="gpt-4",
+        model_version="gpt-5.2",
         prompt="You are a test-writing assistant.",
         task_id="task-001",
     )
@@ -75,7 +75,7 @@ class TestAgentSpawn:
     def test_spawn_returns_agent_instance(self, manager):
         agent = manager.spawn_agent(
             purpose="Generate code",
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt="You are a coder.",
             task_id="task-001",
         )
@@ -84,7 +84,7 @@ class TestAgentSpawn:
     def test_spawn_agent_has_uuid(self, manager):
         agent = manager.spawn_agent(
             purpose="Generate code",
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt="You are a coder.",
             task_id="task-001",
         )
@@ -93,7 +93,7 @@ class TestAgentSpawn:
     def test_spawn_agent_status_is_idle(self, manager):
         agent = manager.spawn_agent(
             purpose="Analyze logs",
-            model_version="gpt-3.5-turbo",
+            model_version="gemini-3-flash",
             prompt="You analyze logs.",
             task_id="task-002",
         )
@@ -102,7 +102,7 @@ class TestAgentSpawn:
     def test_spawn_agent_stores_purpose(self, manager):
         agent = manager.spawn_agent(
             purpose="Refactor module",
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt="Refactor things.",
             task_id="task-003",
         )
@@ -111,11 +111,11 @@ class TestAgentSpawn:
     def test_spawn_agent_stores_model_version(self, manager):
         agent = manager.spawn_agent(
             purpose="Test",
-            model_version="claude-3-opus",
+            model_version="claude-opus-4.5",
             prompt="prompt",
             task_id="task-004",
         )
-        assert agent.model_version == "claude-3-opus"
+        assert agent.model_version == "claude-opus-4.5"
 
     def test_spawn_agent_prompt_hash_is_sha256(self, manager):
         import hashlib
@@ -123,7 +123,7 @@ class TestAgentSpawn:
         prompt = "You are a helper."
         agent = manager.spawn_agent(
             purpose="Help",
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt=prompt,
             task_id="task-005",
         )
@@ -133,7 +133,7 @@ class TestAgentSpawn:
     def test_spawn_agent_workspace_branch_format(self, manager):
         agent = manager.spawn_agent(
             purpose="Build feature",
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt="Build it.",
             task_id="task-006",
         )
@@ -149,7 +149,7 @@ class TestAgentSpawn:
         for i in range(5):
             agent = manager.spawn_agent(
                 purpose=f"Task {i}",
-                model_version="gpt-4",
+                model_version="gpt-5.2",
                 prompt=f"Prompt {i}",
                 task_id=f"task-multi-{i}",
             )
@@ -185,10 +185,10 @@ class TestAgentRetrieval:
 
     def test_list_agents_by_status(self, manager):
         manager.spawn_agent(
-            purpose="A", model_version="gpt-4", prompt="p", task_id="t1"
+            purpose="A", model_version="gpt-5.2", prompt="p", task_id="t1"
         )
         agent_b = manager.spawn_agent(
-            purpose="B", model_version="gpt-4", prompt="p", task_id="t2"
+            purpose="B", model_version="gpt-5.2", prompt="p", task_id="t2"
         )
         manager.update_agent_status(agent_b.agent_id, AgentStatus.WORKING)
 
@@ -201,7 +201,7 @@ class TestAgentRetrieval:
         for i in range(3):
             manager.spawn_agent(
                 purpose=f"Job {i}",
-                model_version="gpt-4",
+                model_version="gpt-5.2",
                 prompt="p",
                 task_id=f"t-{i}",
             )
@@ -291,7 +291,7 @@ class TestJSONPersistence:
         mgr1 = AgentManager(storage_path=storage_file)
         agent = mgr1.spawn_agent(
             purpose="Persist me",
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt="Persist prompt",
             task_id="task-persist",
         )
@@ -301,14 +301,14 @@ class TestJSONPersistence:
         loaded = mgr2.get_agent(agent.agent_id)
         assert loaded is not None
         assert loaded.purpose == "Persist me"
-        assert loaded.model_version == "gpt-4"
+        assert loaded.model_version == "gpt-5.2"
         assert loaded.status == AgentStatus.IDLE
 
     def test_persisted_status_survives_reload(self, storage_file):
         mgr1 = AgentManager(storage_path=storage_file)
         agent = mgr1.spawn_agent(
             purpose="Upgrade",
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt="prompt",
             task_id="task-status",
         )
@@ -358,7 +358,7 @@ class TestSerializationRoundtrip:
         agent = Agent(
             agent_id=uuid4(),
             purpose="Serialize me",
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt_hash="a" * 64,
             created_at=datetime.now(timezone.utc),
             status=AgentStatus.IDLE,
@@ -375,7 +375,7 @@ class TestSerializationRoundtrip:
         agent = Agent(
             agent_id=uuid4(),
             purpose="JSON roundtrip",
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt_hash="b" * 64,
             created_at=datetime.now(timezone.utc),
             status=AgentStatus.WORKING,
@@ -389,7 +389,7 @@ class TestSerializationRoundtrip:
     def test_agent_metadata_to_dict_from_dict(self):
         meta = AgentMetadata(
             agent_id=uuid4(),
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt_hash="c" * 64,
             task_signature="sig123",
             additional_data={"key": "value"},
@@ -404,7 +404,7 @@ class TestSerializationRoundtrip:
     def test_agent_metadata_generate_task_signature(self):
         meta = AgentMetadata(
             agent_id=uuid4(),
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt_hash="d" * 64,
         )
         sig = meta.generate_task_signature("test task")
@@ -734,10 +734,10 @@ class TestAgentsByTask:
 
     def test_get_agents_by_task(self, manager):
         a1 = manager.spawn_agent(
-            purpose="A", model_version="gpt-4", prompt="p", task_id="shared-task"
+            purpose="A", model_version="gpt-5.2", prompt="p", task_id="shared-task"
         )
         a2 = manager.spawn_agent(
-            purpose="B", model_version="gpt-4", prompt="p", task_id="shared-task"
+            purpose="B", model_version="gpt-5.2", prompt="p", task_id="shared-task"
         )
         agents = manager.get_agents_by_task("shared-task")
         ids = {a.agent_id for a in agents}
@@ -754,7 +754,7 @@ class TestCleanupTerminated:
 
     def test_cleanup_all_terminated(self, manager):
         a = manager.spawn_agent(
-            purpose="X", model_version="gpt-4", prompt="p", task_id="t"
+            purpose="X", model_version="gpt-5.2", prompt="p", task_id="t"
         )
         manager.terminate_agent(a.agent_id, cleanup=False)
         removed = manager.cleanup_terminated()

@@ -70,7 +70,7 @@ class AgentConfig:
     
     Attributes:
         agent_id: Unique identifier for this agent configuration
-        agent_type: Type/class of agent to spawn (e.g., "gpt-4", "claude", "custom")
+        agent_type: Type/class of agent to spawn (e.g., "gpt-5.2", "claude-opus-4.5", "custom")
         model_config: Model-specific configuration (temperature, max_tokens, etc.)
         system_prompt: Optional system prompt override
         timeout_seconds: Maximum time allowed for this agent to complete
@@ -1456,22 +1456,22 @@ async def main():
     # Create agent configurations
     agent_configs = [
         AgentConfig(
-            agent_id="gpt-4-agent",
-            agent_type="gpt-4",
+            agent_id="gpt-5.2-agent",
+            agent_type="gpt-5.2",
             model_config={"temperature": 0.7, "max_tokens": 2000},
             timeout_seconds=60,
             priority=10
         ),
         AgentConfig(
             agent_id="claude-agent",
-            agent_type="claude-3",
+            agent_type="claude-opus-4.5",
             model_config={"temperature": 0.5, "max_tokens": 2000},
             timeout_seconds=60,
             priority=9
         ),
         AgentConfig(
-            agent_id="gpt-3.5-agent",
-            agent_type="gpt-3.5",
+            agent_id="gemini-3-flash-agent",
+            agent_type="gemini-3-flash",
             model_config={"temperature": 0.8, "max_tokens": 1500},
             timeout_seconds=45,
             priority=5

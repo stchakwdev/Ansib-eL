@@ -230,7 +230,7 @@ class TestCommitCommand:
                     "--agent-id",
                     "agent-001",
                     "--model-version",
-                    "gpt-4",
+                    "gpt-5.2",
                     "--confidence",
                     "0.95",
                 ],

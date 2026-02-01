@@ -237,7 +237,7 @@ class MockAgent:
     def __init__(
         self,
         purpose: str = "test-task",
-        model_version: str = "gpt-4-test",
+        model_version: str = "gpt-5.2-test",
         status: AgentStatus = AgentStatus.IDLE,
         workspace_branch: str | None = None,
         agent_id: UUID | None = None,
@@ -448,7 +448,7 @@ def sample_agent_metadata() -> GitAgentMetadata:
     """Return a sample ``git_wrapper.AgentMetadata`` instance."""
     return GitAgentMetadata(
         agent_id=str(uuid4()),
-        model_version="gpt-4-turbo",
+        model_version="gpt-5.2",
         prompt_hash=hashlib.sha256(b"test prompt for fixture").hexdigest(),
         timestamp=datetime.now(timezone.utc).isoformat(),
         parent_task=None,
@@ -482,21 +482,21 @@ def sample_agent_configs() -> list[AgentConfig]:
     return [
         AgentConfig(
             agent_id=str(uuid4()),
-            agent_type="gpt-4",
+            agent_type="gpt-5.2",
             model_config={"temperature": 0.7},
             timeout_seconds=60.0,
             priority=2,
         ),
         AgentConfig(
             agent_id=str(uuid4()),
-            agent_type="claude-3",
+            agent_type="claude-opus-4.5",
             model_config={"temperature": 0.5},
             timeout_seconds=60.0,
             priority=1,
         ),
         AgentConfig(
             agent_id=str(uuid4()),
-            agent_type="gpt-4-turbo",
+            agent_type="gpt-5.2",
             model_config={"temperature": 0.3},
             timeout_seconds=60.0,
             priority=0,

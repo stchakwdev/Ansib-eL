@@ -862,7 +862,7 @@ if __name__ == "__main__":
     # Spawn agents for different tasks
     agent1 = manager.spawn_agent(
         purpose="Review authentication module changes",
-        model_version="gpt-4",
+        model_version="gpt-5.2",
         prompt=system_prompt,
         task_id="TASK-001"
     )
@@ -871,10 +871,10 @@ if __name__ == "__main__":
     print(f"  Model: {agent1.model_version}")
     print(f"  Branch: {agent1.workspace_branch}")
     print(f"  Status: {agent1.status.value}")
-    
+
     agent2 = manager.spawn_agent(
         purpose="Optimize database queries",
-        model_version="gpt-4-turbo",
+        model_version="claude-opus-4.5",
         prompt=system_prompt,
         task_id="TASK-002",
         parent_task_id="TASK-001"

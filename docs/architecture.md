@@ -162,7 +162,7 @@ Each file in `.ai-git/metadata/` stores:
 ```json
 {
   "agent_id": "550e8400-e29b-41d4-a716-446655440000",
-  "model_version": "gpt-4-1106-preview",
+  "model_version": "gpt-5.2",
   "prompt_hash": "sha256:a3f5c8...",
   "timestamp": "2024-01-15T10:30:00Z",
   "parent_task": "task-001",

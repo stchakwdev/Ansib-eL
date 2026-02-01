@@ -81,7 +81,7 @@ def _make_metadata(agent_id: str = "agent-001") -> AgentMetadata:
     """Create a sample AgentMetadata instance."""
     return AgentMetadata(
         agent_id=agent_id,
-        model_version="gpt-4-turbo",
+        model_version="gpt-5.2",
         prompt_hash=hashlib.sha256(b"test prompt").hexdigest(),
         timestamp=datetime.now(timezone.utc).isoformat(),
         parent_task="task-001",
@@ -492,7 +492,7 @@ class TestMetadataPersistence:
         agent_id = "agent-meta-rt"
         original_metadata = AgentMetadata(
             agent_id=agent_id,
-            model_version="gpt-4-turbo",
+            model_version="gpt-5.2",
             prompt_hash=hashlib.sha256(b"roundtrip test prompt").hexdigest(),
             timestamp=datetime.now(timezone.utc).isoformat(),
             parent_task="task-roundtrip-001",
@@ -614,7 +614,7 @@ class TestMetadataPersistence:
 
         metadata_with_all = AgentMetadata(
             agent_id="agent-optional-fields",
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt_hash=hashlib.sha256(b"optional fields test").hexdigest(),
             timestamp=datetime.now(timezone.utc).isoformat(),
             parent_task="parent-task-42",

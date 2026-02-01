@@ -62,7 +62,7 @@ After making code changes on the agent branch:
 ```bash
 ai-git commit "Add OAuth login endpoint" \
   --agent-id agent-001 \
-  --model-version gpt-4 \
+  --model-version gpt-5.2 \
   --confidence 0.85
 ```
 
@@ -159,7 +159,7 @@ Ansib-eL reads configuration from environment variables and `.ai-git/config.yaml
 
 ```bash
 # Set defaults via environment
-export ANSIBEL_DEFAULT_MODEL=gpt-4
+export ANSIBEL_DEFAULT_MODEL=gpt-5.2
 export ANSIBEL_TOURNAMENT_AGENTS=3
 export ANSIBEL_TOURNAMENT_TIMEOUT=300
 ```

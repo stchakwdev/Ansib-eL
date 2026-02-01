@@ -203,7 +203,7 @@ class TestCommitWithMetadata:
     def _make_metadata(**overrides) -> AgentMetadata:
         defaults = dict(
             agent_id="test-agent",
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt_hash="hash123",
             timestamp=datetime.now(timezone.utc).isoformat(),
         )
@@ -252,7 +252,7 @@ class TestSaveCommitMetadata:
         _git(tmp_path, "add", "b.txt")
         meta = AgentMetadata(
             agent_id="a1",
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt_hash="ph",
             timestamp="2024-01-01T00:00:00Z",
         )
@@ -439,7 +439,7 @@ class TestGetAiEnhancedHistory:
         _git(tmp_path, "add", "m.txt")
         meta = AgentMetadata(
             agent_id="hist-agent",
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt_hash="p",
             timestamp="2024-06-01T00:00:00Z",
         )
@@ -498,7 +498,7 @@ class TestAgentMetadataRoundtrip:
     def test_roundtrip_all_fields(self) -> None:
         original = AgentMetadata(
             agent_id="roundtrip",
-            model_version="gpt-4-turbo",
+            model_version="gpt-5.2",
             prompt_hash="sha256abc",
             timestamp="2024-12-25T10:00:00Z",
             parent_task="task-99",

@@ -112,8 +112,8 @@ Commits staged changes (or specified files) and stores agent metadata in `.ai-gi
 **Examples:**
 
 ```bash
-ai-git commit "Add OAuth login endpoint" --agent-id agent-001 --model-version gpt-4
-ai-git commit "Fix null check" -a agent-002 -m claude-3 -c 0.95
+ai-git commit "Add OAuth login endpoint" --agent-id agent-001 --model-version gpt-5.2
+ai-git commit "Fix null check" -a agent-002 -m claude-opus-4.5 -c 0.95
 ai-git commit "Update schema" -a agent-001 -f schema.sql -f models.py
 ```
 
@@ -296,7 +296,7 @@ These variables configure default behavior across all commands:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `ANSIBEL_DEFAULT_MODEL` | Default model for new agents | `gpt-4` |
+| `ANSIBEL_DEFAULT_MODEL` | Default model for new agents | `gpt-5.2` |
 | `ANSIBEL_TOURNAMENT_AGENTS` | Number of agents per tournament | `3` |
 | `ANSIBEL_TOURNAMENT_TIMEOUT` | Tournament timeout in seconds | `300` |
 | `ANSIBEL_TRUST_THRESHOLD_HIGH` | High trust tier threshold | `0.8` |

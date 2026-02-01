@@ -106,7 +106,7 @@ def scenario_a() -> None:
         _run(["git", "add", "."], str(tmpdir))
         r = _run([
             sys.executable, "-m", "ansibel.cli", "commit",
-            "Alpha commit", "-a", "agent-alpha", "-m", "gpt-4",
+            "Alpha commit", "-a", "agent-alpha", "-m", "gpt-5.2",
         ])
         assert r.returncode == 0, f"commit alpha failed: {r.stderr}"
     run_test("A", "A3: agent-alpha branch + commit", a3)
@@ -120,7 +120,7 @@ def scenario_a() -> None:
         _run(["git", "add", "."], str(tmpdir))
         r = _run([
             sys.executable, "-m", "ansibel.cli", "commit",
-            "Beta commit", "-a", "agent-beta", "-m", "claude-3",
+            "Beta commit", "-a", "agent-beta", "-m", "claude-opus-4.5",
         ])
         assert r.returncode == 0, f"commit beta failed: {r.stderr}"
     run_test("A", "A4: agent-beta branch + commit", a4)
@@ -261,7 +261,7 @@ def scenario_b() -> None:
     def b7():
         agent = system.agents.spawn_agent(
             purpose="Dogfood agent",
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt="test prompt",
             task_id="dogfood-task",
         )

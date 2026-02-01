@@ -124,7 +124,7 @@ def make_task(**overrides) -> Task:
 
 
 def make_config(agent_id: str, **overrides) -> AgentConfig:
-    defaults = dict(agent_id=agent_id, agent_type="gpt-4", timeout_seconds=5.0)
+    defaults = dict(agent_id=agent_id, agent_type="gpt-5.2", timeout_seconds=5.0)
     defaults.update(overrides)
     return AgentConfig(**defaults)
 
@@ -742,14 +742,14 @@ class TestDataclassAndEnumValidation:
     """Tests for AgentConfig, SolutionStatus, TournamentStatus enums."""
 
     def test_agent_config_defaults(self):
-        config = AgentConfig(agent_id="x", agent_type="gpt-4")
+        config = AgentConfig(agent_id="x", agent_type="gpt-5.2")
         assert config.timeout_seconds == 300.0
         assert config.priority == 0
         assert config.model_config == {}
         assert config.system_prompt is None
 
     def test_agent_config_auto_id(self):
-        config = AgentConfig(agent_id="", agent_type="gpt-4")
+        config = AgentConfig(agent_id="", agent_type="gpt-5.2")
         assert config.agent_id != ""  # __post_init__ generates UUID
 
     def test_solution_status_values(self):
@@ -827,7 +827,7 @@ class TestAsyncAgentAdapter:
         adapter = AsyncAgentAdapter(sync_mgr)
         config = AgentConfig(
             agent_id="a1",
-            agent_type="gpt-4",
+            agent_type="gpt-5.2",
             system_prompt="Be helpful",
             metadata={"purpose": "coding", "task_id": "t1"},
         )

@@ -74,7 +74,7 @@ class AgentConfig:
 
     Attributes:
         agent_id: Unique identifier for this agent configuration
-        agent_type: Type/class of agent to spawn (e.g., "gpt-4", "claude", "custom")
+        agent_type: Type/class of agent to spawn (e.g., "gpt-5.2", "claude-opus-4.5", "custom")
         model_config: Model-specific configuration (temperature, max_tokens, etc.)
         system_prompt: Optional system prompt override
         timeout_seconds: Maximum time allowed for this agent to complete

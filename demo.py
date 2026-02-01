@@ -48,7 +48,7 @@ def demo_agent_system():
         # Spawn an agent
         agent = manager.spawn_agent(
             purpose="Implement user authentication",
-            model_version="gpt-4-1106-preview",
+            model_version="gpt-5.2",
             prompt="Create a secure login system with OAuth support",
             task_id="task-001"
         )
@@ -104,7 +104,7 @@ def demo_git_wrapper():
         # Commit with metadata
         metadata = AgentMetadata(
             agent_id="agent-001",
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt_hash="sha256:abc123...",
             timestamp="2024-01-15T10:30:00Z",
             parent_task="task-001",
@@ -249,7 +249,7 @@ def demo_tournament():
         agent_configs = [
             AgentConfig(
                 agent_id="agent-iterative",
-                agent_type="gpt-4",
+                agent_type="gpt-5.2",
                 model_config={"temperature": 0.7},
                 timeout_seconds=30
             ),
@@ -261,7 +261,7 @@ def demo_tournament():
             ),
             AgentConfig(
                 agent_id="agent-mathlib",
-                agent_type="gpt-4",
+                agent_type="gpt-5.2",
                 model_config={"temperature": 0.5},
                 timeout_seconds=30
             )

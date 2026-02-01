@@ -397,7 +397,7 @@ class AnsibElSystem:
         # Spawn an agent for this task
         agent = self.agents.spawn_agent(
             purpose=task.description,
-            model_version="gpt-4",
+            model_version="gpt-5.2",
             prompt=task.description,
             task_id=str(task.id),
         )

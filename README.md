@@ -94,7 +94,7 @@ pip install -e .
 ```bash
 ai-git init
 ai-git branch agent-001 --purpose "Implement authentication"
-ai-git commit "Add OAuth flow" --agent-id agent-001 --model-version gpt-4
+ai-git commit "Add OAuth flow" --agent-id agent-001 --model-version gpt-5.2
 ai-git review
 ai-git merge agent/agent-001/20240115
 ai-git history
@@ -172,7 +172,7 @@ ansib-el/
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `ANSIBEL_DEFAULT_MODEL` | Default model for agents | `gpt-4` |
+| `ANSIBEL_DEFAULT_MODEL` | Default model for agents | `gpt-5.2` |
 | `ANSIBEL_TOURNAMENT_AGENTS` | Agents per tournament | `3` |
 | `ANSIBEL_TOURNAMENT_TIMEOUT` | Tournament timeout (seconds) | `300` |
 | `ANSIBEL_TRUST_THRESHOLD_HIGH` | High trust threshold | `0.8` |
